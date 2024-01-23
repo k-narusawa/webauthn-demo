@@ -1,5 +1,8 @@
 package com.knarusawa.webauthndemo.config
 
+import com.knarusawa.webauthndemo.adapter.middleware.AuthenticationFailureHandler
+import com.knarusawa.webauthndemo.adapter.middleware.AuthenticationFilter
+import com.knarusawa.webauthndemo.adapter.middleware.AuthenticationSuccessHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,6 +19,12 @@ class SecurityConfig {
     @Autowired
     private lateinit var authenticationConfiguration: AuthenticationConfiguration
 
+    @Autowired
+    private lateinit var authenticationSuccessHandler: AuthenticationSuccessHandler
+
+    @Autowired
+    private lateinit var authenticationFailureHandler: AuthenticationFailureHandler
+
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http.cors {
@@ -25,20 +34,25 @@ class SecurityConfig {
             it.disable()
         }
         http.authorizeHttpRequests {
-            it.requestMatchers("/login").permitAll()
+            it.requestMatchers("/api/v1/login").permitAll()
             it.requestMatchers("/h2-console/**").permitAll()
             it.anyRequest().authenticated()
         }
         http.headers {
             it.frameOptions { it.disable() }
         }
+        http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }
 
-    @Bean
     fun authenticationFilter(): UsernamePasswordAuthenticationFilter {
-        val filter = UsernamePasswordAuthenticationFilter()
+        val filter = AuthenticationFilter(authenticationManager())
+        filter.setRequiresAuthenticationRequestMatcher {
+            it.method == "POST" && it.requestURI == "/api/v1/login"
+        }
         filter.setAuthenticationManager(authenticationManager())
+        filter.setAuthenticationSuccessHandler(authenticationSuccessHandler)
+        filter.setAuthenticationFailureHandler(authenticationFailureHandler)
         return filter
     }
 
