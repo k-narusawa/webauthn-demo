@@ -27,6 +27,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
+    implementation("com.yubico:webauthn-server-core:2.5.0")
     implementation("org.flywaydb:flyway-core:9.22.3")
 
     runtimeOnly("com.h2database:h2")
