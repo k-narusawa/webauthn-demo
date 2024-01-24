@@ -42,6 +42,7 @@ class SecurityConfig {
         }
         http.authorizeHttpRequests {
             it.requestMatchers("/api/v1/login").permitAll()
+            it.requestMatchers("/api/v1/logout").permitAll()
             it.requestMatchers("/h2-console/**").permitAll()
             it.anyRequest().authenticated()
         }

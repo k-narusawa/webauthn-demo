@@ -10,9 +10,13 @@ const LoginPage = () => {
     const fetchUserInfo = async () => {
       await axios("http://127.0.0.1:8080/api/v1/userinfo", {
         withCredentials: true,
-      }).then(() => {
-        router.push("/");
-      });
+      })
+        .then(() => {
+          router.push("/");
+        })
+        .catch(() => {
+          console.log("Not logged in");
+        });
     };
     fetchUserInfo();
   }, [router]);

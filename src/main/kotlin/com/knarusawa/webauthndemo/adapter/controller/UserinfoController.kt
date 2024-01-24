@@ -1,5 +1,6 @@
 package com.knarusawa.webauthndemo.adapter.controller
 
+import com.knarusawa.webauthndemo.adapter.controller.dto.UserinfoGetResponse
 import com.knarusawa.webauthndemo.domain.user.LoginUserDetails
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,7 +21,3 @@ class UserinfoController {
         )
     }
 }
-
-data class UserinfoGetResponse(
-        val username: String,
-)
