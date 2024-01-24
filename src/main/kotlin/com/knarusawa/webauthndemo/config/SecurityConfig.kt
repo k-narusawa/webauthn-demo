@@ -3,6 +3,7 @@ package com.knarusawa.webauthndemo.config
 import com.knarusawa.webauthndemo.adapter.middleware.AuthenticationFailureHandler
 import com.knarusawa.webauthndemo.adapter.middleware.AuthenticationFilter
 import com.knarusawa.webauthndemo.adapter.middleware.AuthenticationSuccessHandler
+import com.knarusawa.webauthndemo.adapter.middleware.AuthorizeFilter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,6 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 class SecurityConfig {
@@ -25,10 +29,13 @@ class SecurityConfig {
     @Autowired
     private lateinit var authenticationFailureHandler: AuthenticationFailureHandler
 
+    @Autowired
+    private lateinit var authorizeFilter: AuthorizeFilter
+
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http.cors {
-            it.disable()
+            it.configurationSource(corsConfigurationSource())
         }
         http.csrf {
             it.disable()
@@ -41,6 +48,7 @@ class SecurityConfig {
         http.headers {
             it.frameOptions { it.disable() }
         }
+        http.addFilterBefore(authorizeFilter, UsernamePasswordAuthenticationFilter::class.java)
         http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }
@@ -65,5 +73,19 @@ class SecurityConfig {
     @Bean
     fun authenticationManager(): AuthenticationManager {
         return authenticationConfiguration.authenticationManager
+    }
+
+    private fun corsConfigurationSource(): CorsConfigurationSource {
+        val config = CorsConfiguration()
+        config.addAllowedMethod(CorsConfiguration.ALL)
+        config.addAllowedHeader(CorsConfiguration.ALL)
+        config.allowCredentials = true
+
+        config.addAllowedOrigin("http://127.0.0.1:3000")
+        config.addAllowedOrigin("http://localhost:3000")
+
+        val corsSource = UrlBasedCorsConfigurationSource()
+        corsSource.registerCorsConfiguration("/**", config)
+        return corsSource
     }
 }
