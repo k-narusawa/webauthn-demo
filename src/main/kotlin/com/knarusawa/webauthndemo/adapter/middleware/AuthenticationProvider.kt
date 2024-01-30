@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationProvider(
-    private val loginUserDetailsService: LoginUserDetailsService,
-    private val passwordEncoder: PasswordEncoder,
+        private val loginUserDetailsService: LoginUserDetailsService,
+        private val passwordEncoder: PasswordEncoder,
 ) : org.springframework.security.authentication.AuthenticationProvider {
     private val log = logger()
     override fun supports(authentication: Class<*>?): Boolean {
@@ -21,8 +21,6 @@ class AuthenticationProvider(
     override fun authenticate(authentication: Authentication): Authentication {
         val username = authentication.principal as String
         val password = authentication.credentials as String
-
-        log.info("username: $username")
 
         val user = loginUserDetailsService.loadUserByUsername(username)
 

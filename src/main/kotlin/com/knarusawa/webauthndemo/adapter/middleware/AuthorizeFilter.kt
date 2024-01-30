@@ -26,7 +26,7 @@ class AuthorizeFilter : OncePerRequestFilter() {
                 return
             }
 
-            log.info("username: ${user.username}")
+            log.info("user_id: ${user.userId}")
             SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(user, null, ArrayList())
         }
 

@@ -5,10 +5,11 @@ import { FormEventHandler, useEffect } from "react";
 
 const LoginPage = () => {
   const router = useRouter();
+  const apiHost = process.env.NEXT_PUBLIC_API_HOST;
 
   useEffect(() => {
     const fetchUserInfo = async () => {
-      await axios("http://127.0.0.1:8080/api/v1/userinfo", {
+      await axios(`${apiHost}/api/v1/userinfo`, {
         withCredentials: true,
       })
         .then(() => {
@@ -19,7 +20,7 @@ const LoginPage = () => {
         });
     };
     fetchUserInfo();
-  }, [router]);
+  }, [apiHost, router]);
 
   const handleLogin: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -34,7 +35,7 @@ const LoginPage = () => {
     };
 
     await axios
-      .post("http://127.0.0.1:8080/api/v1/login", data, {
+      .post(`${apiHost}/api/v1/login`, data, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
