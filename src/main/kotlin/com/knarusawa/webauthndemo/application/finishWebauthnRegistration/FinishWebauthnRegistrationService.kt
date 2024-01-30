@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class FinishWebauthnRegistrationService(
-//        private val webAuthnManager: WebAuthnManager
-) {
+class FinishWebauthnRegistrationService {
     companion object {
         private const val PR_ID = "localhost"
     }
