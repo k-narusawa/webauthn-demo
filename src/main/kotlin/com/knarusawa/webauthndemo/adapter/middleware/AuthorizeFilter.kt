@@ -13,9 +13,13 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class AuthorizeFilter : OncePerRequestFilter() {
-    private val matcher = AntPathRequestMatcher("/api/v1/login")
+    private val matcher = AntPathRequestMatcher("/api/v1/login/**")
     private val log = logger()
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
+    ) {
         if (!matcher.matches(request)) {
             log.info("Authorize Filter")
             val user = request.session.getAttribute("user") as? LoginUserDetails
@@ -27,7 +31,8 @@ class AuthorizeFilter : OncePerRequestFilter() {
             }
 
             log.info("user_id: ${user.userId}")
-            SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(user, null, ArrayList())
+            SecurityContextHolder.getContext().authentication =
+                UsernamePasswordAuthenticationToken(user, null, ArrayList())
         }
 
         filterChain.doFilter(request, response)
