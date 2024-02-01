@@ -10,19 +10,19 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class RegistrationChallengeRepositoryImpl(
-    private val registrationChallengeDao: RegistrationChallengeDao
+        private val registrationChallengeDao: RegistrationChallengeDao
 ) : RegistrationChallengeRepository {
     override fun save(challenge: RegistrationChallenge) {
         registrationChallengeDao.save(RegistrationChallengeRecord.from(challenge))
     }
 
-    override fun findByUserId(userId: UserId) {
+    override fun findByUserId(userId: UserId): RegistrationChallenge? {
         val record = registrationChallengeDao.findByUserId(userId = userId.toString())
-            ?: throw ChallengeNotFoundException(
-                userId = userId.toString(),
-                challenge = null
-            )
+                ?: throw ChallengeNotFoundException(
+                        userId = userId.toString(),
+                        challenge = null
+                )
 
-        return
+        return RegistrationChallenge.from(record)
     }
 }

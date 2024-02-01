@@ -48,9 +48,35 @@ const HomePage = () => {
       })
       .then((response) => {
         console.log(response);
+        registerCredentials(response);
       })
       .catch((error) => {
         console.log(error);
+      });
+  };
+
+  const registerCredentials = async (credentials: any) => {
+    await axios(`${apiHost}/api/v1/webauthn/registration/finish`, {
+      method: "POST",
+      withCredentials: true,
+      data: {
+        id: credentials.id,
+        rawId: base64url.encode(credentials.rawId),
+        type: credentials.type,
+        response: {
+          attestationObject: base64url.encode(
+            credentials.response.attestationObject
+          ),
+          clientDataJSON: base64url.encode(credentials.response.clientDataJSON),
+        },
+      },
+    })
+      .then((response) => {
+        console.log(response.data);
+        createCredential(response.data);
+      })
+      .catch((error) => {
+        console.log(error.response.data);
       });
   };
 

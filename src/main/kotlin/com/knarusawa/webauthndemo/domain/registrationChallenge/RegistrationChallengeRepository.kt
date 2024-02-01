@@ -4,5 +4,5 @@ import com.knarusawa.webauthndemo.domain.user.UserId
 
 interface RegistrationChallengeRepository {
     fun save(challenge: RegistrationChallenge)
-    fun findByUserId(userId: UserId)
+    fun findByUserId(userId: UserId): RegistrationChallenge?
 }

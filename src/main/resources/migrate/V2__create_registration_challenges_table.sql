@@ -1,9 +1,9 @@
-CREATE TABLE registration_challenge
+CREATE TABLE registration_challenges
 (
-    id         MEDIUMINT    NOT NULL AUTO_INCREMENT,
-    user_id    VARCHAR(255) PRIMARY KEY,
+    id         MEDIUMINT    PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    user_id    VARCHAR(255) NOT NULL,
     challenge  VARCHAR(255) NOT NULL,
-    expired_at DATETIME     NOT NULL
+    expired_at DATETIME     NOT NULL,
     created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
