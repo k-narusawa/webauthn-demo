@@ -4,6 +4,8 @@ import com.knarusawa.webauthndemo.domain.credentials.Credentials
 import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
 import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallengeRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
+import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentials
+import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentialsRepository
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
@@ -20,8 +22,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class FinishWebauthnRegistrationService(
-        private val registrationChallengeRepository: RegistrationChallengeRepository,
-        private val credentialsRepository: CredentialsRepository
+    private val registrationChallengeRepository: RegistrationChallengeRepository,
+    private val credentialsRepository: CredentialsRepository,
+    private val userCredentialsRepository: UserCredentialsRepository
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -29,7 +32,8 @@ class FinishWebauthnRegistrationService(
 
     fun exec(inputData: FinishWebauthnRegistrationInputData) {
         val origin = Origin.create("http://localhost:3000")
-        val challengeData = registrationChallengeRepository.findByUserId(UserId.from(inputData.userId))
+        val challengeData =
+            registrationChallengeRepository.findByUserId(UserId.from(inputData.userId))
 
         val challenge = challengeData?.let { Base64UrlUtil.decode(challengeData.challenge) }
 
@@ -40,42 +44,58 @@ class FinishWebauthnRegistrationService(
         val registrationRequest = RegistrationRequest(attestationObject, clientDataJSON)
         val registrationParameters = RegistrationParameters(serverProperty, true)
 
-        val registrationData = WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
+        val registrationData =
+            WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
 
         try {
-            WebAuthnManager.createNonStrictWebAuthnManager().validate(registrationRequest, registrationParameters)
+            WebAuthnManager.createNonStrictWebAuthnManager()
+                .validate(registrationRequest, registrationParameters)
         } catch (ex: ValidationException) {
             throw ex
         }
 
         if (
-                registrationData.attestationObject == null ||
-                registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
+            registrationData.attestationObject == null ||
+            registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
         ) {
             throw RuntimeException("不正なデータ")
         }
 
         val authenticator = AuthenticatorImpl(
-                registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
-                registrationData.attestationObject!!.attestationStatement,
-                registrationData.attestationObject!!.authenticatorData.signCount,
+            registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
+            registrationData.attestationObject!!.attestationStatement,
+            registrationData.attestationObject!!.authenticatorData.signCount,
         )
 
-        val credentialId = registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
+        val credentialId =
+            registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
 
         val objectConverter = ObjectConverter()
         val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
 
         val credentials = Credentials.of(
-                credentialId = Base64UrlUtil.encodeToString(credentialId),
-                serializedAttestedCredentialData = attestedCredentialDataConverter.convert(authenticator.attestedCredentialData),
-                serializedEnvelope = objectConverter.cborConverter.writeValueAsBytes(authenticator.attestationStatement),
-                serializedTransports = objectConverter.cborConverter.writeValueAsBytes(objectConverter.cborConverter.writeValueAsBytes(authenticator.attestationStatement)),
-                serializedAuthenticatorExtensions = objectConverter.cborConverter.writeValueAsBytes(authenticator.authenticatorExtensions),
-                serializedClientExtensions = objectConverter.cborConverter.writeValueAsBytes(authenticator.authenticatorExtensions),
-                counter = authenticator.counter
+            credentialId = Base64UrlUtil.encodeToString(credentialId),
+            serializedAttestedCredentialData = attestedCredentialDataConverter.convert(authenticator.attestedCredentialData),
+            serializedEnvelope = objectConverter.cborConverter.writeValueAsBytes(authenticator.attestationStatement),
+            serializedTransports = objectConverter.cborConverter.writeValueAsBytes(
+                objectConverter.cborConverter.writeValueAsBytes(
+                    authenticator.attestationStatement
+                )
+            ),
+            serializedAuthenticatorExtensions = objectConverter.cborConverter.writeValueAsBytes(
+                authenticator.authenticatorExtensions
+            ),
+            serializedClientExtensions = objectConverter.cborConverter.writeValueAsBytes(
+                authenticator.authenticatorExtensions
+            ),
+            counter = authenticator.counter
+        )
+        val userCredentials = UserCredentials.of(
+            credentialId = Base64UrlUtil.encodeToString(credentialId),
+            userId = UserId.from(inputData.userId)
         )
 
         credentialsRepository.save(credentials)
+        userCredentialsRepository.save(userCredentials)
     }
 }
