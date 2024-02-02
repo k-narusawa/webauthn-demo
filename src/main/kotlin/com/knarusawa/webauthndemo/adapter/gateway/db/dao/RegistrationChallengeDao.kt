@@ -4,5 +4,6 @@ import com.knarusawa.webauthndemo.adapter.gateway.db.record.RegistrationChalleng
 import org.springframework.data.repository.CrudRepository
 
 interface RegistrationChallengeDao : CrudRepository<RegistrationChallengeRecord, String> {
-    fun findByUserId(userId: String): RegistrationChallengeRecord?
+    fun findByUserId(userId: String): List<RegistrationChallengeRecord>
+    fun deleteByUserId(userId: String)
 }

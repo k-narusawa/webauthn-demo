@@ -1,6 +1,5 @@
 package com.knarusawa.webauthndemo.adapter.gateway.db
 
-import com.knarusawa.webauthndemo.adapter.exception.ChallengeNotFoundException
 import com.knarusawa.webauthndemo.adapter.gateway.db.dao.RegistrationChallengeDao
 import com.knarusawa.webauthndemo.adapter.gateway.db.record.RegistrationChallengeRecord
 import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallenge
@@ -16,13 +15,15 @@ class RegistrationChallengeRepositoryImpl(
         registrationChallengeDao.save(RegistrationChallengeRecord.from(challenge))
     }
 
-    override fun findByUserId(userId: UserId): RegistrationChallenge? {
-        val record = registrationChallengeDao.findByUserId(userId = userId.toString())
-                ?: throw ChallengeNotFoundException(
-                        userId = userId.toString(),
-                        challenge = null
-                )
+    override fun findByUserId(userId: UserId): List<RegistrationChallenge> {
+        val records = registrationChallengeDao.findByUserId(userId = userId.toString())
 
-        return RegistrationChallenge.from(record)
+        return records.map {
+            RegistrationChallenge.from(it)
+        }
+    }
+
+    override fun deleteByUserId(userId: UserId) {
+        registrationChallengeDao.deleteByUserId(userId = userId.value())
     }
 }
