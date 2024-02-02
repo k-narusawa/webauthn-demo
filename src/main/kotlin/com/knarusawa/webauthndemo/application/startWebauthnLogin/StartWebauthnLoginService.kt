@@ -3,6 +3,8 @@ package com.knarusawa.webauthndemo.application.startWebauthnLogin
 import com.knarusawa.webauthndemo.domain.flow.Flow
 import com.knarusawa.webauthndemo.domain.flow.FlowRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
+import com.knarusawa.webauthndemo.domain.user.UserRepository
+import com.knarusawa.webauthndemo.domain.user.Username
 import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentialsRepository
 import com.webauthn4j.data.*
 import com.webauthn4j.data.client.challenge.DefaultChallenge
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 class StartWebauthnLoginService(
         private val flowRepository: FlowRepository,
         private val userCredentialsRepository: UserCredentialsRepository,
+        private val userRepository: UserRepository,
 ) {
     companion object {
         private val RP = PublicKeyCredentialRpEntity("localhost", "localhost")
@@ -23,10 +26,12 @@ class StartWebauthnLoginService(
     @Transactional
     fun exec(inputData: StartWebauthnLoginInputData): StartWebauthnLoginOutputData {
         val challenge = DefaultChallenge()
+        val user = userRepository.findByUsername(Username.of(inputData.username))
+                ?: throw IllegalArgumentException("User not found")
 
-        val flow = Flow.of(userId = UserId.from(inputData.userId), challenge = challenge)
+        val flow = Flow.of(userId = UserId.from(user.userId.value()), challenge = challenge)
 
-        val userCredentials = userCredentialsRepository.findByUserId(UserId.from(inputData.userId))
+        val userCredentials = userCredentialsRepository.findByUserId(UserId.from(user.userId.value()))
 
         val allowCredentials = userCredentials.map {
             PublicKeyCredentialDescriptor(

@@ -81,6 +81,18 @@ const HomePage = () => {
       });
   };
 
+  const handleAuthenticate = async () => {
+    await axios(`${apiHost}/api/v1/webauthn/authenticate/start`, {
+      withCredentials: true,
+    })
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.log(error.response.data);
+      });
+  };
+
   const handleLogout = async () => {
     await axios(`${apiHost}/api/v1/logout`, {
       method: "POST",
@@ -88,7 +100,6 @@ const HomePage = () => {
     })
       .then(function (response) {
         console.log(response.data);
-        router.push("/login");
       })
       .catch(function (error) {
         console.log(error.response.data);
@@ -113,6 +124,13 @@ const HomePage = () => {
         className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
       >
         Registration
+      </button>
+      <button
+        onClick={handleAuthenticate}
+        type="button"
+        className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
+      >
+        WebAuthn Login
       </button>
       <button
         onClick={handleLogout}
