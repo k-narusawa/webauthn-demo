@@ -13,4 +13,10 @@ class CredentialsRepositoryImpl(
     override fun save(credentials: Credentials) {
         credentialsDao.save(CredentialsRecord.from(credentials))
     }
+
+    override fun findByCredentialId(credentialId: String): Credentials? {
+        return credentialsDao.findByCredentialId(credentialId)?.let {
+            Credentials.from(it)
+        }
+    }
 }

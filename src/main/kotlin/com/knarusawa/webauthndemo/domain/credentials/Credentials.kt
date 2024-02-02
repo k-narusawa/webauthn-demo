@@ -1,5 +1,6 @@
 package com.knarusawa.webauthndemo.domain.credentials
 
+import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
 import com.webauthn4j.util.Base64UrlUtil
 
 class Credentials private constructor(
@@ -28,6 +29,16 @@ class Credentials private constructor(
                 serializedAuthenticatorExtensions = Base64UrlUtil.encodeToString(serializedAuthenticatorExtensions),
                 serializedClientExtensions = Base64UrlUtil.encodeToString(serializedClientExtensions),
                 counter = counter,
+        )
+
+        fun from(record: CredentialsRecord) = Credentials(
+                credentialId = record.credentialId,
+                serializedAttestedCredentialData = record.serializedAttestedCredentialData,
+                serializedEnvelope = record.serializedEnvelope,
+                serializedTransports = record.serializedTransports,
+                serializedAuthenticatorExtensions = record.serializedAuthenticatorExtensions,
+                serializedClientExtensions = record.serializedClientExtensions,
+                counter = record.counter,
         )
     }
 }

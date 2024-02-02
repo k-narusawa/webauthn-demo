@@ -95,6 +95,7 @@ class FinishWebauthnRegistrationService(
                 ),
                 counter = authenticator.counter
         )
+        
         val userCredentials = UserCredentials.of(
                 credentialId = Base64UrlUtil.encodeToString(credentialId),
                 userId = UserId.from(inputData.userId)
