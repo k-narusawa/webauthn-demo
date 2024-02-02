@@ -2,8 +2,8 @@ package com.knarusawa.webauthndemo.application.finishWebauthnRegistration
 
 import com.knarusawa.webauthndemo.domain.credentials.Credentials
 import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
-import com.knarusawa.webauthndemo.domain.registrationChallenge.FlowId
-import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallengeRepository
+import com.knarusawa.webauthndemo.domain.flow.FlowId
+import com.knarusawa.webauthndemo.domain.flow.FlowRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
 import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentials
 import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentialsRepository
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebauthnRegistrationService(
-        private val registrationChallengeRepository: RegistrationChallengeRepository,
+        private val flowRepository: FlowRepository,
         private val credentialsRepository: CredentialsRepository,
         private val userCredentialsRepository: UserCredentialsRepository
 ) {
@@ -35,10 +35,10 @@ class FinishWebauthnRegistrationService(
     @Transactional
     fun exec(inputData: FinishWebauthnRegistrationInputData) {
         val origin = Origin.create("http://localhost:3000")
-        val challengeData =
-                registrationChallengeRepository.findByFlowId(FlowId.from(inputData.flowId))
+        val flow =
+                flowRepository.findByFlowId(FlowId.from(inputData.flowId))
 
-        val challenge = challengeData?.let { Base64UrlUtil.decode(it.challenge) }
+        val challenge = flow?.let { Base64UrlUtil.decode(it.challenge) }
 
         val attestationObject = Base64UrlUtil.decode(inputData.attestationObject)
         val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)
@@ -101,6 +101,6 @@ class FinishWebauthnRegistrationService(
         credentialsRepository.save(credentials)
         userCredentialsRepository.save(userCredentials)
 
-        registrationChallengeRepository.deleteByUserId(UserId.from(inputData.userId))
+        flowRepository.deleteByUserId(UserId.from(inputData.userId))
     }
 }

@@ -1,7 +1,7 @@
 package com.knarusawa.webauthndemo.application.startWebAuthnRegistration
 
-import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallenge
-import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallengeRepository
+import com.knarusawa.webauthndemo.domain.flow.Flow
+import com.knarusawa.webauthndemo.domain.flow.FlowRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
 import com.webauthn4j.data.*
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class StartWebAuthnRegistrationService(
-        private val registrationChallengeRepository: RegistrationChallengeRepository
+        private val flowRepository: FlowRepository
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -59,11 +59,11 @@ class StartWebAuthnRegistrationService(
                 null,
         )
 
-        val registrationChallenge =
-                RegistrationChallenge.of(userId = UserId.from(inputData.userId), challenge = challenge)
+        val flow =
+                Flow.of(userId = UserId.from(inputData.userId), challenge = challenge)
 
-        registrationChallengeRepository.save(registrationChallenge)
+        flowRepository.save(flow)
 
-        return StartWebAuthnRegistrationOutputData(flowId = registrationChallenge.flowId, options = options)
+        return StartWebAuthnRegistrationOutputData(flowId = flow.flowId, options = options)
     }
 }

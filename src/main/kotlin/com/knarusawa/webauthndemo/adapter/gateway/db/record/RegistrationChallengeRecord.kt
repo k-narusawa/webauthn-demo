@@ -1,6 +1,6 @@
 package com.knarusawa.webauthndemo.adapter.gateway.db.record
 
-import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallenge
+import com.knarusawa.webauthndemo.domain.flow.Flow
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -30,11 +30,11 @@ data class RegistrationChallengeRecord(
         val updatedAt: LocalDateTime? = null
 ) {
     companion object {
-        fun from(registrationChallenge: RegistrationChallenge) = RegistrationChallengeRecord(
-                flowId = registrationChallenge.flowId.value(),
-                userId = registrationChallenge.userId.toString(),
-                challenge = registrationChallenge.challenge,
-                expiredAt = registrationChallenge.expiredAt
+        fun from(flow: Flow) = RegistrationChallengeRecord(
+                flowId = flow.flowId.value(),
+                userId = flow.userId.toString(),
+                challenge = flow.challenge,
+                expiredAt = flow.expiredAt
         )
     }
 }

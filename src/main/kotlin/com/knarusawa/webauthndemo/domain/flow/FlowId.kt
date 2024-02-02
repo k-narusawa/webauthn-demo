@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.domain.registrationChallenge
+package com.knarusawa.webauthndemo.domain.flow
 
 import java.util.*
 

@@ -1,6 +1,6 @@
 package com.knarusawa.webauthndemo.application.startWebAuthnRegistration
 
-import com.knarusawa.webauthndemo.domain.registrationChallenge.FlowId
+import com.knarusawa.webauthndemo.domain.flow.FlowId
 import com.webauthn4j.data.PublicKeyCredentialCreationOptions
 
 class StartWebAuthnRegistrationOutputData(

@@ -1,7 +1,7 @@
 package com.knarusawa.webauthndemo.adapter.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.knarusawa.webauthndemo.domain.registrationChallenge.FlowId
+import com.knarusawa.webauthndemo.domain.flow.FlowId
 import com.webauthn4j.data.*
 import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientInputs
 import com.webauthn4j.data.extension.client.RegistrationExtensionClientInput
