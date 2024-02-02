@@ -7,6 +7,7 @@ import com.knarusawa.webauthndemo.domain.flow.FlowRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
 import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentials
 import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentialsRepository
+import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
@@ -30,6 +31,7 @@ class FinishWebauthnRegistrationService(
 ) {
     companion object {
         private const val PR_ID = "localhost"
+        private val log = logger()
     }
 
     @Transactional
@@ -102,5 +104,7 @@ class FinishWebauthnRegistrationService(
         userCredentialsRepository.save(userCredentials)
 
         flowRepository.deleteByUserId(UserId.from(inputData.userId))
+
+        log.info("Webauth登録完了 userId: ${inputData.userId}")
     }
 }
