@@ -1,5 +1,6 @@
 package com.knarusawa.webauthndemo.application.startWebauthnLogin
 
 data class StartWebauthnLoginInputData(
-    val username: String
+        val userId: String,
+        val username: String,
 )

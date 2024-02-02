@@ -2,6 +2,7 @@ package com.knarusawa.webauthndemo.adapter.gateway.db
 
 import com.knarusawa.webauthndemo.adapter.gateway.db.dao.RegistrationChallengeDao
 import com.knarusawa.webauthndemo.adapter.gateway.db.record.RegistrationChallengeRecord
+import com.knarusawa.webauthndemo.domain.registrationChallenge.FlowId
 import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallenge
 import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallengeRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
@@ -13,6 +14,12 @@ class RegistrationChallengeRepositoryImpl(
 ) : RegistrationChallengeRepository {
     override fun save(challenge: RegistrationChallenge) {
         registrationChallengeDao.save(RegistrationChallengeRecord.from(challenge))
+    }
+
+    override fun findByFlowId(flowId: FlowId): RegistrationChallenge? {
+        return registrationChallengeDao.findByFlowId(flowId.value())?.let {
+            RegistrationChallenge.from(it)
+        }
     }
 
     override fun findByUserId(userId: UserId): List<RegistrationChallenge> {

@@ -1,13 +1,16 @@
 package com.knarusawa.webauthndemo.application.startWebAuthnRegistration
 
+import com.knarusawa.webauthndemo.domain.registrationChallenge.FlowId
 import com.webauthn4j.data.PublicKeyCredentialCreationOptions
 
 class StartWebAuthnRegistrationOutputData(
+        val flowId: FlowId,
         val options: PublicKeyCredentialCreationOptions
 ) {
-    fun from(options: PublicKeyCredentialCreationOptions): StartWebAuthnRegistrationOutputData {
+    fun from(flowId: FlowId, options: PublicKeyCredentialCreationOptions): StartWebAuthnRegistrationOutputData {
 
         return StartWebAuthnRegistrationOutputData(
+                flowId = flowId,
                 options = options
         )
     }

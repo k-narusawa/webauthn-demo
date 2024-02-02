@@ -1,6 +1,6 @@
 CREATE TABLE registration_challenges
 (
-    id         MEDIUMINT    PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    flow_id    VARCHAR(255) PRIMARY KEY NOT NULL,
     user_id    VARCHAR(255) NOT NULL,
     challenge  VARCHAR(255) NOT NULL,
     expired_at DATETIME     NOT NULL,

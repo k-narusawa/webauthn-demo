@@ -2,6 +2,7 @@ package com.knarusawa.webauthndemo.application.finishWebauthnRegistration
 
 import com.knarusawa.webauthndemo.domain.credentials.Credentials
 import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
+import com.knarusawa.webauthndemo.domain.registrationChallenge.FlowId
 import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallengeRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
 import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentials
@@ -34,10 +35,10 @@ class FinishWebauthnRegistrationService(
     @Transactional
     fun exec(inputData: FinishWebauthnRegistrationInputData) {
         val origin = Origin.create("http://localhost:3000")
-        val challengeDataList =
-                registrationChallengeRepository.findByUserId(UserId.from(inputData.userId)).firstOrNull()
+        val challengeData =
+                registrationChallengeRepository.findByFlowId(FlowId.from(inputData.flowId))
 
-        val challenge = challengeDataList?.let { Base64UrlUtil.decode(challengeDataList.challenge) }
+        val challenge = challengeData?.let { Base64UrlUtil.decode(it.challenge) }
 
         val attestationObject = Base64UrlUtil.decode(inputData.attestationObject)
         val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)

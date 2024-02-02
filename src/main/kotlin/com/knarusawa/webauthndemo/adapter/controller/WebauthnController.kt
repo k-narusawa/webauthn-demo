@@ -28,7 +28,7 @@ class WebauthnController(
         )
         val outputData = startWebAuthnRegistrationService.exec(inputData)
 
-        return WebauthnRegistrationStartGetResponse.from(options = outputData.options)
+        return WebauthnRegistrationStartGetResponse.from(flowId = outputData.flowId, options = outputData.options)
     }
 
     @PostMapping("/registration/finish")
@@ -40,6 +40,7 @@ class WebauthnController(
                 ?: throw IllegalStateException("Principalが不正")
 
         val inputData = FinishWebauthnRegistrationInputData(
+                flowId = body.flowId,
                 userId = user.userId,
                 username = user.username,
                 id = body.id,

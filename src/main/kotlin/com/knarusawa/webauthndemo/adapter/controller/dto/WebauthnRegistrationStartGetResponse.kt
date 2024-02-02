@@ -1,6 +1,7 @@
 package com.knarusawa.webauthndemo.adapter.controller.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.knarusawa.webauthndemo.domain.registrationChallenge.FlowId
 import com.webauthn4j.data.*
 import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientInputs
 import com.webauthn4j.data.extension.client.RegistrationExtensionClientInput
@@ -8,8 +9,8 @@ import com.webauthn4j.util.Base64UrlUtil
 
 
 data class WebauthnRegistrationStartGetResponse(
-//        @JsonProperty("flowId")
-//        val flowId: String,
+        @JsonProperty("flowId")
+        val flowId: String,
 
         @JsonProperty("rp")
         val rp: PublicKeyCredentialRpEntity,
@@ -39,9 +40,10 @@ data class WebauthnRegistrationStartGetResponse(
         val extensions: AuthenticationExtensionsClientInputs<RegistrationExtensionClientInput?>?,
 ) {
     companion object {
-        fun from(options: PublicKeyCredentialCreationOptions): WebauthnRegistrationStartGetResponse {
+        fun from(flowId: FlowId, options: PublicKeyCredentialCreationOptions): WebauthnRegistrationStartGetResponse {
 
             return WebauthnRegistrationStartGetResponse(
+                    flowId = flowId.value(),
                     rp = options.rp,
                     user = CustomPublicKeyCredentialUserEntity(
                             id = Base64UrlUtil.encodeToString(options.user.id),

@@ -1,15 +1,18 @@
 package com.knarusawa.webauthndemo.adapter.gateway.db.record
 
 import com.knarusawa.webauthndemo.domain.registrationChallenge.RegistrationChallenge
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "registration_challenges")
 data class RegistrationChallengeRecord(
         @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val id: Int? = null,
+        @Column(name = "flow_id")
+        val flowId: String,
 
         @Column(name = "user_id")
         val userId: String,
@@ -28,6 +31,7 @@ data class RegistrationChallengeRecord(
 ) {
     companion object {
         fun from(registrationChallenge: RegistrationChallenge) = RegistrationChallengeRecord(
+                flowId = registrationChallenge.flowId.value(),
                 userId = registrationChallenge.userId.toString(),
                 challenge = registrationChallenge.challenge,
                 expiredAt = registrationChallenge.expiredAt

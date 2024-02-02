@@ -48,18 +48,19 @@ const HomePage = () => {
       })
       .then((response) => {
         console.log(response);
-        registerCredentials(response);
+        registerCredentials(options.flowId, response);
       })
       .catch((error) => {
         console.log(error);
       });
   };
 
-  const registerCredentials = async (credentials: any) => {
+  const registerCredentials = async (flowId: string, credentials: any) => {
     await axios(`${apiHost}/api/v1/webauthn/registration/finish`, {
       method: "POST",
       withCredentials: true,
       data: {
+        flowId: flowId,
         id: credentials.id,
         rawId: base64url.encode(credentials.rawId),
         type: credentials.type,
