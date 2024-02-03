@@ -1,8 +1,11 @@
 package com.knarusawa.webauthndemo.adapter.controller
 
+import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnAuthenticateFinishPostRequest
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnAuthenticateStartGetResponse
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnRegistrationFinishPostRequest
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnRegistrationStartGetResponse
+import com.knarusawa.webauthndemo.application.finishWebauthnLogin.FinishWebauthnLoginInputData
+import com.knarusawa.webauthndemo.application.finishWebauthnLogin.FinishWebauthnLoginService
 import com.knarusawa.webauthndemo.application.finishWebauthnRegistration.FinishWebauthnRegistrationInputData
 import com.knarusawa.webauthndemo.application.finishWebauthnRegistration.FinishWebauthnRegistrationService
 import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationInputData
@@ -19,6 +22,7 @@ class WebauthnController(
         private val startWebAuthnRegistrationService: StartWebAuthnRegistrationService,
         private val finishWebAuthnRegistrationService: FinishWebauthnRegistrationService,
         private val startWebauthnLoginService: StartWebauthnLoginService,
+        private val finishWebauthnLoginService: FinishWebauthnLoginService
 ) {
     @GetMapping("/registration/start")
     fun webauthnRegistrationStartGet(): WebauthnRegistrationStartGetResponse {
@@ -72,5 +76,25 @@ class WebauthnController(
                 flowId = outputData.flowId.value(),
                 options = outputData.options
         )
+    }
+
+    @PostMapping("/authenticate/finish")
+    fun webauthnAuthenticateFinishPost(
+            @RequestBody body: WebauthnAuthenticateFinishPostRequest
+    ) {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val user = authentication.principal as? LoginUserDetails
+                ?: throw IllegalStateException("Principalが不正")
+
+        val inputData = FinishWebauthnLoginInputData(
+                flowId = body.flowId,
+                userId = user.userId,
+                credentialId = body.rawId,
+                clientDataJSON = body.response.clientDataJSON,
+                authenticatorData = body.response.authenticatorData,
+                signature = body.response.clientDataJSON,
+                userHandle = body.response.userHandle
+        )
+        finishWebauthnLoginService.exec(inputData)
     }
 }

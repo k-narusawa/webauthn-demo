@@ -8,7 +8,7 @@ import com.knarusawa.webauthndemo.domain.user.Username
 import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentialsRepository
 import com.webauthn4j.data.*
 import com.webauthn4j.data.client.challenge.DefaultChallenge
-import com.webauthn4j.util.Base64Util
+import com.webauthn4j.util.Base64UrlUtil
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -36,7 +36,7 @@ class StartWebauthnLoginService(
         val allowCredentials = userCredentials.map {
             PublicKeyCredentialDescriptor(
                     PublicKeyCredentialType.PUBLIC_KEY,
-                    Base64Util.decode(it.credentialId),
+                    Base64UrlUtil.decode(it.credentialId),
                     HashSet(listOf(AuthenticatorTransport.USB,
                             AuthenticatorTransport.BLE,
                             AuthenticatorTransport.INTERNAL,

@@ -29,7 +29,6 @@ const HomePage = () => {
       withCredentials: true,
     })
       .then((response) => {
-        console.log(response.data);
         createCredential(response.data);
       })
       .catch((error) => {
@@ -38,6 +37,7 @@ const HomePage = () => {
   };
 
   const createCredential = async (options: any) => {
+    console.log(options);
     options.user.id = bufferDecode(options.user.id);
     options.challenge = bufferDecode(options.challenge);
 
@@ -74,7 +74,6 @@ const HomePage = () => {
     })
       .then((response) => {
         console.log(response.data);
-        createCredential(response.data);
       })
       .catch((error) => {
         console.log(error.response.data);
@@ -84,6 +83,54 @@ const HomePage = () => {
   const handleAuthenticate = async () => {
     await axios(`${apiHost}/api/v1/webauthn/authenticate/start`, {
       withCredentials: true,
+    })
+      .then((response) => {
+        console.log(response.data);
+        getCredentials(response.data);
+      })
+      .catch((error) => {
+        console.log(error.response.data);
+      });
+  };
+
+  const getCredentials = async (options: any) => {
+    options.challenge = bufferDecode(options.challenge);
+    for (let cred of options.allowCredentials) {
+      cred.id = bufferDecode(cred.id);
+    }
+    console.log(options);
+
+    await navigator.credentials
+      .get({
+        publicKey: options,
+      })
+      .then((response) => {
+        console.log(response);
+        postCredentials(options.flowId, response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const postCredentials = async (flowId: string, credentials: any) => {
+    await axios(`${apiHost}/api/v1/webauthn/authenticate/finish`, {
+      method: "POST",
+      withCredentials: true,
+      data: {
+        flowId: flowId,
+        id: credentials.id,
+        rawId: base64url.encode(credentials.rawId),
+        type: credentials.type,
+        response: {
+          authenticatorData: base64url.encode(
+            credentials.response.authenticatorData
+          ),
+          clientDataJSON: base64url.encode(credentials.response.clientDataJSON),
+          signature: base64url.encode(credentials.response.signature),
+          userHandle: base64url.encode(credentials.response.userHandle),
+        },
+      },
     })
       .then((response) => {
         console.log(response.data);
@@ -100,6 +147,7 @@ const HomePage = () => {
     })
       .then(function (response) {
         console.log(response.data);
+        router.push("/login");
       })
       .catch(function (error) {
         console.log(error.response.data);
