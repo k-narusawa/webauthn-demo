@@ -21,9 +21,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebauthnLoginService(
-        private val flowRepository: FlowRepository,
-        private val credentialsRepository: CredentialsRepository,
-        private val userCredentialsRepository: UserCredentialsRepository
+    private val flowRepository: FlowRepository,
+    private val credentialsRepository: CredentialsRepository,
+    private val userCredentialsRepository: UserCredentialsRepository
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -31,55 +31,56 @@ class FinishWebauthnLoginService(
 
     @Transactional
     fun exec(inputData: FinishWebauthnLoginInputData) {
-        println(inputData)
-
         val origin = Origin.create("http://localhost:3000")
         val flow = flowRepository.findByFlowId(FlowId.from(inputData.flowId))
-                ?: throw IllegalArgumentException("flow is not found")
+            ?: throw IllegalArgumentException("flow is not found")
         val challenge = flow.let { Base64UrlUtil.decode(it.challenge) }
 
         val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
 
         val authenticationRequest = AuthenticationRequest(
-                /* credentialId = */      Base64UrlUtil.decode(inputData.credentialId),
-                /* userHandle = */        Base64UrlUtil.decode(inputData.userHandle),
-                /* authenticatorData = */ Base64UrlUtil.decode(inputData.authenticatorData),
-                /* clientDataJSON = */    Base64UrlUtil.decode(inputData.clientDataJSON),
-                /* signature = */         Base64UrlUtil.decode(inputData.signature),
+            /* credentialId = */      Base64UrlUtil.decode(inputData.credentialId),
+            /* userHandle = */        Base64UrlUtil.decode(inputData.userHandle),
+            /* authenticatorData = */ Base64UrlUtil.decode(inputData.authenticatorData),
+            /* clientDataJSON = */    Base64UrlUtil.decode(inputData.clientDataJSON),
+            /* signature = */         Base64UrlUtil.decode(inputData.signature),
         )
 
         val userCredentials = userCredentialsRepository.findByUserId(UserId.from(inputData.userId))
 
         val allowCredentials = userCredentials.map {
             PublicKeyCredentialDescriptor(
-                    PublicKeyCredentialType.PUBLIC_KEY,
-                    Base64UrlUtil.decode(it.credentialId),
-                    HashSet(listOf(AuthenticatorTransport.USB,
-                            AuthenticatorTransport.BLE,
-                            AuthenticatorTransport.INTERNAL,
-                            AuthenticatorTransport.NFC)
+                PublicKeyCredentialType.PUBLIC_KEY,
+                Base64UrlUtil.decode(it.credentialId),
+                HashSet(
+                    listOf(
+                        AuthenticatorTransport.USB,
+                        AuthenticatorTransport.BLE,
+                        AuthenticatorTransport.INTERNAL,
+                        AuthenticatorTransport.NFC
                     )
+                )
             )
         }
 
         val credentials = credentialsRepository.findByCredentialId(inputData.credentialId)
-                ?: throw IllegalArgumentException("credential is not found")
+            ?: throw IllegalArgumentException("credential is not found")
 
         val attestedCredentialDataConverter = AttestedCredentialDataConverter(ObjectConverter())
 
-
         val authenticator = AuthenticatorImpl(
-                /* attestedCredentialData = */ attestedCredentialDataConverter.convert(Base64UrlUtil.decode(credentials.serializedAttestedCredentialData)),
-                /* attestationStatement = */   null,
-                /* counter = */                credentials.counter
+            /* attestedCredentialData = */ attestedCredentialDataConverter.convert(
+                Base64UrlUtil.decode(credentials.serializedAttestedCredentialData)
+            ),
+            /* attestationStatement = */   null,
+            /* counter = */                credentials.counter
         )
 
         val authenticationParameter = AuthenticationParameters(
-                serverProperty,
-                authenticator,
-                allowCredentials.map { it.id },
-                false,
-                false
+            serverProperty,
+            authenticator,
+            allowCredentials.map { it.id },
+            false
         )
 
         try {
@@ -90,7 +91,8 @@ class FinishWebauthnLoginService(
         }
 
         try {
-            WebAuthnManager.createNonStrictWebAuthnManager().validate(authenticationRequest, authenticationParameter)
+            WebAuthnManager.createNonStrictWebAuthnManager()
+                .validate(authenticationRequest, authenticationParameter)
         } catch (ex: Exception) {
             throw ex
         }
