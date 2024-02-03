@@ -1,6 +1,5 @@
 package com.knarusawa.webauthndemo.application.finishWebauthnRegistration
 
-import com.knarusawa.webauthndemo.domain.credentials.AttestationStatementEnvelope
 import com.knarusawa.webauthndemo.domain.credentials.Credentials
 import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
 import com.knarusawa.webauthndemo.domain.flow.FlowId
@@ -11,15 +10,12 @@ import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentialsReposito
 import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
-import com.webauthn4j.converter.AttestedCredentialDataConverter
-import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.data.RegistrationParameters
 import com.webauthn4j.data.RegistrationRequest
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
 import com.webauthn4j.util.Base64UrlUtil
-import com.webauthn4j.validator.exception.ValidationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -42,7 +38,6 @@ class FinishWebauthnRegistrationService(
             flowRepository.findByFlowId(FlowId.from(inputData.flowId))
 
         val challenge = flow?.let { Base64UrlUtil.decode(it.challenge) }
-
         val attestationObject = Base64UrlUtil.decode(inputData.attestationObject)
         val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)
 
@@ -53,12 +48,9 @@ class FinishWebauthnRegistrationService(
         val registrationData =
             WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
 
-        try {
-            WebAuthnManager.createNonStrictWebAuthnManager()
-                .validate(registrationRequest, registrationParameters)
-        } catch (ex: ValidationException) {
-            throw ex
-        }
+        WebAuthnManager.createNonStrictWebAuthnManager()
+            .validate(registrationRequest, registrationParameters)
+
 
         if (
             registrationData.attestationObject == null ||
@@ -76,30 +68,7 @@ class FinishWebauthnRegistrationService(
         val credentialId =
             registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
 
-        val objectConverter = ObjectConverter()
-        val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
-        val attestationStatementEnvelope =
-            AttestationStatementEnvelope(authenticator.attestationStatement!!)
-        val serializedEnvelope =
-            objectConverter.cborConverter.writeValueAsBytes(attestationStatementEnvelope);
-
-        val credentials = Credentials.of(
-            credentialId = Base64UrlUtil.encodeToString(credentialId),
-            serializedAttestedCredentialData = attestedCredentialDataConverter.convert(authenticator.attestedCredentialData),
-            serializedEnvelope = serializedEnvelope,
-            serializedTransports = objectConverter.cborConverter.writeValueAsBytes(
-                objectConverter.cborConverter.writeValueAsBytes(
-                    authenticator.transports
-                )
-            ),
-            serializedAuthenticatorExtensions = objectConverter.cborConverter.writeValueAsBytes(
-                authenticator.authenticatorExtensions
-            ),
-            serializedClientExtensions = objectConverter.cborConverter.writeValueAsBytes(
-                authenticator.clientExtensions
-            ),
-            counter = authenticator.counter
-        )
+        val credentials = Credentials.of(authenticator = authenticator, credentialId = credentialId)
 
         val userCredentials = UserCredentials.of(
             credentialId = Base64UrlUtil.encodeToString(credentialId),
@@ -108,9 +77,6 @@ class FinishWebauthnRegistrationService(
 
         credentialsRepository.save(credentials)
         userCredentialsRepository.save(userCredentials)
-
         flowRepository.deleteByUserId(UserId.from(inputData.userId))
-
-        log.info("Webauth登録完了 userId: ${inputData.userId}")
     }
 }

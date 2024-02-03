@@ -4,14 +4,16 @@ import com.knarusawa.webauthndemo.domain.flow.FlowId
 import com.webauthn4j.data.PublicKeyCredentialCreationOptions
 
 class StartWebAuthnRegistrationOutputData(
-        val flowId: FlowId,
-        val options: PublicKeyCredentialCreationOptions
+    val flowId: FlowId,
+    val options: PublicKeyCredentialCreationOptions
 ) {
-    fun from(flowId: FlowId, options: PublicKeyCredentialCreationOptions): StartWebAuthnRegistrationOutputData {
-
+    fun from(
+        flowId: FlowId,
+        options: PublicKeyCredentialCreationOptions
+    ): StartWebAuthnRegistrationOutputData {
         return StartWebAuthnRegistrationOutputData(
-                flowId = flowId,
-                options = options
+            flowId = flowId,
+            options = options
         )
     }
 }
