@@ -10,8 +10,11 @@ import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentialsReposito
 import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
+import com.webauthn4j.data.PublicKeyCredentialParameters
+import com.webauthn4j.data.PublicKeyCredentialType
 import com.webauthn4j.data.RegistrationParameters
 import com.webauthn4j.data.RegistrationRequest
+import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
@@ -41,9 +44,20 @@ class FinishWebAuthnRegistrationService(
         val attestationObject = Base64UrlUtil.decode(inputData.attestationObject)
         val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)
 
+        val pubKeys = listOf(
+            PublicKeyCredentialParameters(
+                PublicKeyCredentialType.PUBLIC_KEY,
+                COSEAlgorithmIdentifier.ES256
+            ),
+            PublicKeyCredentialParameters(
+                PublicKeyCredentialType.PUBLIC_KEY,
+                COSEAlgorithmIdentifier.RS256
+            ),
+        )
+
         val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
         val registrationRequest = RegistrationRequest(attestationObject, clientDataJSON)
-        val registrationParameters = RegistrationParameters(serverProperty, true)
+        val registrationParameters = RegistrationParameters(serverProperty, pubKeys, true)
 
         val registrationData =
             WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
@@ -56,7 +70,7 @@ class FinishWebAuthnRegistrationService(
             registrationData.attestationObject == null ||
             registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
         ) {
-            throw RuntimeException("不正なデータ")
+            throw IllegalStateException("不正なデータ")
         }
 
         val authenticator = AuthenticatorImpl(
