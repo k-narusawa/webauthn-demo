@@ -25,7 +25,7 @@ class StartWebAuthnRegistrationService(
         val rpId = PR_ID
         val challenge = DefaultChallenge()
 
-        val pubKeys = listOf(
+        val pubKeyCredParams = listOf(
             PublicKeyCredentialParameters(
                 PublicKeyCredentialType.PUBLIC_KEY,
                 COSEAlgorithmIdentifier.ES256
@@ -52,7 +52,7 @@ class StartWebAuthnRegistrationService(
             /* rp =                     */ PublicKeyCredentialRpEntity(rpId, "webauthn-demo"),
             /* user =                   */ user,
             /* challenge =              */ challenge,
-            /* pubKeyCredParams =       */ pubKeys,
+            /* pubKeyCredParams =       */ pubKeyCredParams,
             /* timeout =                */ TimeUnit.SECONDS.toMillis(6000),
             /* excludeCredentials =     */ null,
             /* authenticatorSelection = */ authenticatorSelectionCriteria,
