@@ -36,15 +36,15 @@ class StartWebAuthnRegistrationService(
         )
 
         val user = PublicKeyCredentialUserEntity(
-            inputData.userId.toByteArray(),
-            inputData.username,
-            inputData.username,
+            /* id = */          inputData.userId.toByteArray(),
+            /* name = */        inputData.username,
+            /* displayName = */ inputData.username,
         )
 
         val authenticatorSelectionCriteria = AuthenticatorSelectionCriteria(
             AuthenticatorAttachment.CROSS_PLATFORM,
             false,
-            UserVerificationRequirement.PREFERRED
+            UserVerificationRequirement.REQUIRED
         )
 
         val options = PublicKeyCredentialCreationOptions(
