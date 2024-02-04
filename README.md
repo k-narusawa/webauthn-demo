@@ -2,4 +2,4 @@
 
 ### デモ
 
-[!webauthn-login](./docs/webauthn_login.gif)
+![webauthn-login](./docs/webauthn_login.gif)
