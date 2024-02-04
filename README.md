@@ -5,7 +5,7 @@
 サーバーサイドアプリケーションの起動
 
 ```shell
-./gradlew bootrun
+./gradlew bootRun
 ```
 
 フロントエンドアプリケーションの起動
