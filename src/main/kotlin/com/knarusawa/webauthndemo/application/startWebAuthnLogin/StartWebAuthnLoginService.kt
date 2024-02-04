@@ -60,7 +60,7 @@ class StartWebAuthnLoginService(
             60000,
             RP.id,
             allowCredentials,
-            UserVerificationRequirement.PREFERRED,
+            UserVerificationRequirement.REQUIRED,
             null
         )
         flowRepository.save(flow)

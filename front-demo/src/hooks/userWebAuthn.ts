@@ -27,14 +27,12 @@ export const useWebAuthn = () => {
         publicKey: options,
       })
       .then((response) => {
-        console.log(response);
         if(!response){
           throw new Error('No response from navigator.credentials.create');
         }
         return response;
       })
       .catch((error) => {
-        console.log(error);
         throw new Error(error);
       });
   };
@@ -58,9 +56,10 @@ export const useWebAuthn = () => {
     })
       .then((response) => {
         console.log(response.data);
+        alert("Registration successful");
       })
       .catch((error) => {
-        throw new Error(error.response.data);
+        alert("Registration failed - " + error.response.data);
       });
   };
 
