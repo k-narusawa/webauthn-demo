@@ -2,10 +2,8 @@ package com.knarusawa.webauthndemo.adapter.controller
 
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnRegistrationFinishPostRequest
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnRegistrationStartGetResponse
-import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginService
 import com.knarusawa.webauthndemo.application.finishWebAuthnRegistration.FinishWebAuthnRegistrationInputData
 import com.knarusawa.webauthndemo.application.finishWebAuthnRegistration.FinishWebAuthnRegistrationService
-import com.knarusawa.webauthndemo.application.startWebAuthnLogin.StartWebAuthnLoginService
 import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationInputData
 import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationService
 import com.knarusawa.webauthndemo.domain.user.LoginUserDetails
@@ -17,8 +15,6 @@ import org.springframework.web.bind.annotation.*
 class WebauthnController(
     private val startWebAuthnRegistrationService: StartWebAuthnRegistrationService,
     private val finishWebAuthnRegistrationService: FinishWebAuthnRegistrationService,
-    private val startWebauthnLoginService: StartWebAuthnLoginService,
-    private val finishWebauthnLoginService: FinishWebAuthnLoginService
 ) {
     @GetMapping("/registration/start")
     fun webauthnRegistrationStartGet(): WebauthnRegistrationStartGetResponse {
