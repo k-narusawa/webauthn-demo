@@ -2,7 +2,11 @@ package com.knarusawa.webauthndemo.adapter.middleware
 
 import com.knarusawa.webauthndemo.adapter.exception.PasswordNotMatchException
 import com.knarusawa.webauthndemo.application.LoginUserDetailsService
-import com.knarusawa.webauthndemo.util.logger
+import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginService
+import com.knarusawa.webauthndemo.domain.authenticationToken.WebauthnAssertionAuthenticationToken
+import com.knarusawa.webauthndemo.domain.user.LoginUserDetails
+import com.knarusawa.webauthndemo.domain.user.UserRepository
+import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -10,19 +14,27 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationProvider(
+    private val userRepository: UserRepository,
     private val loginUserDetailsService: LoginUserDetailsService,
     private val passwordEncoder: PasswordEncoder,
+    private val finishWebauthnLoginService: FinishWebAuthnLoginService,
 ) : org.springframework.security.authentication.AuthenticationProvider {
-    private val log = logger()
     override fun supports(authentication: Class<*>?): Boolean {
-        return UsernamePasswordAuthenticationToken::class.java.isAssignableFrom(authentication)
+        return AbstractAuthenticationToken::class.java.isAssignableFrom(authentication)
     }
 
     override fun authenticate(authentication: Authentication): Authentication {
+        if (authentication is WebauthnAssertionAuthenticationToken) {
+            val outputData = finishWebauthnLoginService.exec(authentication.credentials)
+
+            val user = userRepository.findByUserId(userId = outputData.userId)
+            val loginUser = LoginUserDetails(user!!)
+
+            return UsernamePasswordAuthenticationToken(loginUser, null)
+        }
+
         val username = authentication.principal as String
         val password = authentication.credentials as String
-
-        log.info("username: $username")
 
         val user = loginUserDetailsService.loadUserByUsername(username)
 

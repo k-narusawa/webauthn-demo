@@ -1,8 +1,14 @@
 package com.knarusawa.webauthndemo.adapter.middleware
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnAuthenticateFinishPostRequest
+import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginInputData
+import com.knarusawa.webauthndemo.domain.authenticationToken.WebauthnAssertionAuthenticationToken
+import com.knarusawa.webauthndemo.domain.flow.FlowId
 import com.knarusawa.webauthndemo.util.logger
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -13,11 +19,15 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
 
+
 class AuthenticationFilter(
     private val authenticationManager: AuthenticationManager
 ) : UsernamePasswordAuthenticationFilter() {
+    companion object {
+        private val log = logger()
+    }
+
     private var customSecurityContextRepository: SecurityContextRepository? = null
-    private val log = logger()
 
     init {
         this.customSecurityContextRepository = DelegatingSecurityContextRepository(
@@ -30,13 +40,40 @@ class AuthenticationFilter(
     override fun attemptAuthentication(
         request: HttpServletRequest, response: HttpServletResponse
     ): Authentication {
-        log.info("Start Authentication")
+        log.info("METHOD: [${request.method}], URL: [${request.requestURI}]")
         saveContext(request, response)
+
+        if (request.requestURI == "/api/v1/webauthn/login") {
+            val webAuthnRequest = jacksonObjectMapper().readValue(
+                request.inputStream,
+                WebauthnAuthenticateFinishPostRequest::class.java
+            )
+
+            log.info("WebAuthn login challenge id is ${webAuthnRequest.flowId}")
+
+            val principal = FlowId.from(webAuthnRequest.flowId)
+            val credentials = FinishWebAuthnLoginInputData(
+                flowId = webAuthnRequest.flowId,
+                credentialId = webAuthnRequest.rawId,
+                clientDataJSON = webAuthnRequest.response.clientDataJSON,
+                authenticatorData = webAuthnRequest.response.authenticatorData,
+                signature = webAuthnRequest.response.signature,
+                userHandle = webAuthnRequest.response.userHandle
+            )
+
+            val authRequest: AbstractAuthenticationToken =
+                WebauthnAssertionAuthenticationToken(
+                    principal = principal,
+                    credentials = credentials,
+                )
+
+//            setDetails(request, authRequest)
+
+            return this.authenticationManager.authenticate(authRequest)
+        }
 
         val username = obtainUsername(request)
         val password = obtainPassword(request)
-
-        log.info("username: $username")
 
         val authRequest = UsernamePasswordAuthenticationToken(username, password)
 
