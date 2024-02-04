@@ -1,15 +1,11 @@
 package com.knarusawa.webauthndemo.adapter.controller
 
-import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnAuthenticateFinishPostRequest
-import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnAuthenticateStartGetResponse
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnRegistrationFinishPostRequest
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnRegistrationStartGetResponse
-import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginInputData
 import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginService
 import com.knarusawa.webauthndemo.application.finishWebAuthnRegistration.FinishWebAuthnRegistrationInputData
 import com.knarusawa.webauthndemo.application.finishWebAuthnRegistration.FinishWebAuthnRegistrationService
 import com.knarusawa.webauthndemo.application.startWebAuthnLogin.StartWebAuthnLoginService
-import com.knarusawa.webauthndemo.application.startWebAuthnLogin.StartWebauthnLoginInputData
 import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationInputData
 import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationService
 import com.knarusawa.webauthndemo.domain.user.LoginUserDetails
@@ -61,38 +57,5 @@ class WebauthnController(
             clientDataJSON = body.response.clientDataJSON,
         )
         finishWebAuthnRegistrationService.exec(inputData)
-    }
-
-    @GetMapping("/authenticate/start")
-    fun webauthnAuthenticateStartGet(): WebauthnAuthenticateStartGetResponse {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val user = authentication.principal as? LoginUserDetails
-            ?: throw IllegalStateException("Principalが不正")
-
-        val inputData = StartWebauthnLoginInputData(
-            username = user.username
-        )
-
-        val outputData = startWebauthnLoginService.exec(inputData)
-
-        return WebauthnAuthenticateStartGetResponse.from(
-            flowId = outputData.flowId.value(),
-            options = outputData.options
-        )
-    }
-
-    @PostMapping("/authenticate/finish")
-    fun webauthnAuthenticateFinishPost(
-        @RequestBody body: WebauthnAuthenticateFinishPostRequest
-    ) {
-        val inputData = FinishWebAuthnLoginInputData(
-            flowId = body.flowId,
-            credentialId = body.rawId,
-            clientDataJSON = body.response.clientDataJSON,
-            authenticatorData = body.response.authenticatorData,
-            signature = body.response.signature,
-            userHandle = body.response.userHandle
-        )
-        finishWebauthnLoginService.exec(inputData)
     }
 }
