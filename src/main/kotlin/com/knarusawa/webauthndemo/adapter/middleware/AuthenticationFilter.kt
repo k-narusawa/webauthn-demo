@@ -1,14 +1,11 @@
 package com.knarusawa.webauthndemo.adapter.middleware
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnAuthenticateFinishPostRequest
-import com.knarusawa.webauthndemo.config.WebAuthnConfig
+import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginInputData
 import com.knarusawa.webauthndemo.domain.authenticationToken.WebauthnAssertionAuthenticationToken
+import com.knarusawa.webauthndemo.domain.flow.FlowId
 import com.knarusawa.webauthndemo.util.logger
-import com.webauthn4j.springframework.security.WebAuthnAuthenticationParameters
-import com.webauthn4j.springframework.security.WebAuthnAuthenticationRequest
-import com.webauthn4j.util.Base64UrlUtil
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.AbstractAuthenticationToken
@@ -28,7 +25,6 @@ class AuthenticationFilter(
 ) : UsernamePasswordAuthenticationFilter() {
     companion object {
         private val log = logger()
-        private val objectMapper = ObjectMapper()
     }
 
     private var customSecurityContextRepository: SecurityContextRepository? = null
@@ -48,37 +44,27 @@ class AuthenticationFilter(
         saveContext(request, response)
 
         if (request.requestURI == "/api/v1/webauthn/login") {
-//            val req = request.getReader().lines().collect(Collectors.joining("\r\n"));
-//            log.info(req)
-
             val webAuthnRequest = jacksonObjectMapper().readValue(
                 request.inputStream,
                 WebauthnAuthenticateFinishPostRequest::class.java
             )
 
             log.info("WebAuthn login challenge id is ${webAuthnRequest.flowId}")
-            webAuthnRequest.response.userHandle
 
-            val webAuthnAuthenticationRequest = WebAuthnAuthenticationRequest(
-                Base64UrlUtil.decode(webAuthnRequest.rawId),
-                Base64UrlUtil.decode(webAuthnRequest.response.clientDataJSON),
-                Base64UrlUtil.decode(webAuthnRequest.response.authenticatorData),
-                Base64UrlUtil.decode(webAuthnRequest.response.signature),
-                null,
+            val principal = FlowId.from(webAuthnRequest.flowId)
+            val credentials = FinishWebAuthnLoginInputData(
+                flowId = webAuthnRequest.flowId,
+                credentialId = webAuthnRequest.rawId,
+                clientDataJSON = webAuthnRequest.response.clientDataJSON,
+                authenticatorData = webAuthnRequest.response.authenticatorData,
+                signature = webAuthnRequest.response.signature,
+                userHandle = webAuthnRequest.response.userHandle
             )
 
-            val webAuthnAuthenticationParameters = WebAuthnAuthenticationParameters(
-                WebAuthnConfig().serverProperty(challenge = "".toByteArray()),
-                true,
-                true
-            )
-            println(webAuthnRequest.response.userHandle)
             val authRequest: AbstractAuthenticationToken =
                 WebauthnAssertionAuthenticationToken(
-                    flowId = webAuthnRequest.flowId,
-                    principal = webAuthnAuthenticationRequest,
-                    credentials = webAuthnAuthenticationParameters,
-                    userHandle = webAuthnRequest.response.userHandle,
+                    principal = principal,
+                    credentials = credentials,
                 )
 
 //            setDetails(request, authRequest)

@@ -1,14 +1,12 @@
 package com.knarusawa.webauthndemo.domain.authenticationToken
 
-import com.webauthn4j.springframework.security.WebAuthnAuthenticationParameters
-import com.webauthn4j.springframework.security.WebAuthnAuthenticationRequest
+import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginInputData
+import com.knarusawa.webauthndemo.domain.flow.FlowId
 import org.springframework.security.authentication.AbstractAuthenticationToken
 
 class WebauthnAssertionAuthenticationToken(
-    val flowId: String,
-    val userHandle: String,
-    val principal: WebAuthnAuthenticationRequest,
-    val credentials: WebAuthnAuthenticationParameters,
+    val principal: FlowId,
+    val credentials: FinishWebAuthnLoginInputData,
 ) : AbstractAuthenticationToken(listOf()) {
 
     override fun getPrincipal(): Any {
@@ -18,6 +16,4 @@ class WebauthnAssertionAuthenticationToken(
     override fun getCredentials(): Any {
         return this.credentials
     }
-
-
 }
