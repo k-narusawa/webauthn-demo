@@ -8,24 +8,32 @@ import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
+import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class AuthorizeFilter : OncePerRequestFilter() {
-    private val matcher = AntPathRequestMatcher("/api/v1/login/**")
     private val log = logger()
+
+    val matchers = listOf(
+        AntPathRequestMatcher("/api/v1/login"),
+        AntPathRequestMatcher("/api/v1/webauthn/login/request"),
+        AntPathRequestMatcher("/api/v1/webauthn/login")
+    )
+    val combinedMatcher = OrRequestMatcher(matchers)
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        if (!matcher.matches(request)) {
-            log.info("Authorize Filter")
+        if (!combinedMatcher.matches(request)) {
             val user = request.session.getAttribute("user") as? LoginUserDetails
 
             if (user == null) {
-                log.warn("Authorize Filter: Unauthorized")
+                log.info("Request is Unauthorized")
+                log.info("METHOD: [${request.method}], URL: [${request.requestURL}]")
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
                 return
             }

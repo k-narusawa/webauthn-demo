@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.application.startWebauthnRegistration
+package com.knarusawa.webauthndemo.application.startWebAuthnRegistration
 
 import com.knarusawa.webauthndemo.domain.flow.Flow
 import com.knarusawa.webauthndemo.domain.flow.FlowRepository
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 
 @Service
-class StartWebauthnRegistrationService(
+class StartWebAuthnRegistrationService(
     private val flowRepository: FlowRepository
 ) {
     companion object {
@@ -20,7 +20,7 @@ class StartWebauthnRegistrationService(
     }
 
     @Transactional
-    fun exec(inputData: StartWebauthnRegistrationInputData): StartWebauthnRegistrationOutputData {
+    fun exec(inputData: StartWebAuthnRegistrationInputData): StartWebAuthnRegistrationOutputData {
         val rpId = PR_ID
         val challenge = DefaultChallenge()
 
@@ -64,6 +64,6 @@ class StartWebauthnRegistrationService(
 
         flowRepository.save(flow)
 
-        return StartWebauthnRegistrationOutputData(flowId = flow.flowId, options = options)
+        return StartWebAuthnRegistrationOutputData(flowId = flow.flowId, options = options)
     }
 }

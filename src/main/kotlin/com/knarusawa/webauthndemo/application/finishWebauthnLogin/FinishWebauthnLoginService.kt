@@ -30,7 +30,7 @@ class FinishWebauthnLoginService(
     }
 
     @Transactional
-    fun exec(inputData: FinishWebauthnLoginInputData) {
+    fun exec(inputData: FinishWebauthnLoginInputData): FinishWebauthnLoginOutputData {
         val origin = Origin.create("http://localhost:3000")
         val flow = flowRepository.findByFlowId(FlowId.from(inputData.flowId))
             ?: throw IllegalArgumentException("flow is not found")
@@ -46,7 +46,8 @@ class FinishWebauthnLoginService(
             /* signature = */         Base64UrlUtil.decode(inputData.signature),
         )
 
-        val userCredentials = userCredentialsRepository.findByUserId(UserId.from(inputData.userId))
+        val userCredentials =
+            userCredentialsRepository.findByUserId(UserId.from(flow.userId.value()))
 
         val allowCredentials = userCredentials.map {
             PublicKeyCredentialDescriptor(
@@ -96,5 +97,7 @@ class FinishWebauthnLoginService(
         } catch (ex: Exception) {
             throw ex
         }
+
+        return FinishWebauthnLoginOutputData(userId = flow.userId)
     }
 }

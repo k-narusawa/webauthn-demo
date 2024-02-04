@@ -8,10 +8,10 @@ import com.knarusawa.webauthndemo.application.finishWebauthnLogin.FinishWebauthn
 import com.knarusawa.webauthndemo.application.finishWebauthnLogin.FinishWebauthnLoginService
 import com.knarusawa.webauthndemo.application.finishWebauthnRegistration.FinishWebauthnRegistrationInputData
 import com.knarusawa.webauthndemo.application.finishWebauthnRegistration.FinishWebauthnRegistrationService
+import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationInputData
+import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationService
 import com.knarusawa.webauthndemo.application.startWebauthnLogin.StartWebauthnLoginInputData
 import com.knarusawa.webauthndemo.application.startWebauthnLogin.StartWebauthnLoginService
-import com.knarusawa.webauthndemo.application.startWebauthnRegistration.StartWebauthnRegistrationInputData
-import com.knarusawa.webauthndemo.application.startWebauthnRegistration.StartWebauthnRegistrationService
 import com.knarusawa.webauthndemo.domain.user.LoginUserDetails
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/v1/webauthn")
 class WebauthnController(
-    private val startWebAuthnRegistrationService: StartWebauthnRegistrationService,
+    private val startWebAuthnRegistrationService: StartWebAuthnRegistrationService,
     private val finishWebAuthnRegistrationService: FinishWebauthnRegistrationService,
     private val startWebauthnLoginService: StartWebauthnLoginService,
     private val finishWebauthnLoginService: FinishWebauthnLoginService
@@ -30,7 +30,7 @@ class WebauthnController(
         val user = authentication.principal as? LoginUserDetails
             ?: throw IllegalStateException("Principalが不正")
 
-        val inputData = StartWebauthnRegistrationInputData(
+        val inputData = StartWebAuthnRegistrationInputData(
             userId = user.userId,
             username = user.username,
         )
@@ -85,13 +85,8 @@ class WebauthnController(
     fun webauthnAuthenticateFinishPost(
         @RequestBody body: WebauthnAuthenticateFinishPostRequest
     ) {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val user = authentication.principal as? LoginUserDetails
-            ?: throw IllegalStateException("Principalが不正")
-
         val inputData = FinishWebauthnLoginInputData(
             flowId = body.flowId,
-            userId = user.userId,
             credentialId = body.rawId,
             clientDataJSON = body.response.clientDataJSON,
             authenticatorData = body.response.authenticatorData,

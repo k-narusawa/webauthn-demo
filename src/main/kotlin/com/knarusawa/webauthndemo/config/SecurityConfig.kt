@@ -42,6 +42,7 @@ class SecurityConfig {
         }
         http.authorizeHttpRequests {
             it.requestMatchers("/api/v1/login").permitAll()
+            it.requestMatchers("/api/v1/webauthn/login/request").permitAll()
             it.requestMatchers("/api/v1/logout").permitAll()
             it.requestMatchers("/h2-console/**").permitAll()
             it.anyRequest().authenticated()
@@ -57,7 +58,8 @@ class SecurityConfig {
     fun authenticationFilter(): UsernamePasswordAuthenticationFilter {
         val filter = AuthenticationFilter(authenticationManager())
         filter.setRequiresAuthenticationRequestMatcher {
-            it.method == "POST" && it.requestURI == "/api/v1/login"
+            (it.method == "POST" && it.requestURI == "/api/v1/login") or
+                    (it.method == "POST" && it.requestURI == "/api/v1/webauthn/login")
         }
         filter.setAuthenticationManager(authenticationManager())
         filter.setAuthenticationSuccessHandler(authenticationSuccessHandler)

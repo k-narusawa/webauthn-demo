@@ -25,6 +25,7 @@ class AuthenticationFailureHandler() :
             }
 
             else -> {
+                exception?.printStackTrace()
                 log.error("想定外の認証失敗")
             }
         }
