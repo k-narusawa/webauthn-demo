@@ -4,14 +4,14 @@ import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnAuthenticateFin
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnAuthenticateStartGetResponse
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnRegistrationFinishPostRequest
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnRegistrationStartGetResponse
-import com.knarusawa.webauthndemo.application.finishWebauthnLogin.FinishWebauthnLoginInputData
-import com.knarusawa.webauthndemo.application.finishWebauthnLogin.FinishWebauthnLoginService
-import com.knarusawa.webauthndemo.application.finishWebauthnRegistration.FinishWebauthnRegistrationInputData
-import com.knarusawa.webauthndemo.application.finishWebauthnRegistration.FinishWebauthnRegistrationService
+import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginInputData
+import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginService
+import com.knarusawa.webauthndemo.application.finishWebAuthnRegistration.FinishWebAuthnRegistrationInputData
+import com.knarusawa.webauthndemo.application.finishWebAuthnRegistration.FinishWebAuthnRegistrationService
+import com.knarusawa.webauthndemo.application.startWebAuthnLogin.StartWebAuthnLoginService
+import com.knarusawa.webauthndemo.application.startWebAuthnLogin.StartWebauthnLoginInputData
 import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationInputData
 import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationService
-import com.knarusawa.webauthndemo.application.startWebauthnLogin.StartWebauthnLoginInputData
-import com.knarusawa.webauthndemo.application.startWebauthnLogin.StartWebauthnLoginService
 import com.knarusawa.webauthndemo.domain.user.LoginUserDetails
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/webauthn")
 class WebauthnController(
     private val startWebAuthnRegistrationService: StartWebAuthnRegistrationService,
-    private val finishWebAuthnRegistrationService: FinishWebauthnRegistrationService,
-    private val startWebauthnLoginService: StartWebauthnLoginService,
-    private val finishWebauthnLoginService: FinishWebauthnLoginService
+    private val finishWebAuthnRegistrationService: FinishWebAuthnRegistrationService,
+    private val startWebauthnLoginService: StartWebAuthnLoginService,
+    private val finishWebauthnLoginService: FinishWebAuthnLoginService
 ) {
     @GetMapping("/registration/start")
     fun webauthnRegistrationStartGet(): WebauthnRegistrationStartGetResponse {
@@ -50,7 +50,7 @@ class WebauthnController(
         val user = authentication.principal as? LoginUserDetails
             ?: throw IllegalStateException("Principalが不正")
 
-        val inputData = FinishWebauthnRegistrationInputData(
+        val inputData = FinishWebAuthnRegistrationInputData(
             flowId = body.flowId,
             userId = user.userId,
             username = user.username,
@@ -85,7 +85,7 @@ class WebauthnController(
     fun webauthnAuthenticateFinishPost(
         @RequestBody body: WebauthnAuthenticateFinishPostRequest
     ) {
-        val inputData = FinishWebauthnLoginInputData(
+        val inputData = FinishWebAuthnLoginInputData(
             flowId = body.flowId,
             credentialId = body.rawId,
             clientDataJSON = body.response.clientDataJSON,

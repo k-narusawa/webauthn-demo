@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.application.finishWebauthnRegistration
+package com.knarusawa.webauthndemo.application.finishWebAuthnRegistration
 
 import com.knarusawa.webauthndemo.domain.credentials.Credentials
 import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 
 
 @Service
-class FinishWebauthnRegistrationService(
+class FinishWebAuthnRegistrationService(
     private val flowRepository: FlowRepository,
     private val credentialsRepository: CredentialsRepository,
     private val userCredentialsRepository: UserCredentialsRepository
@@ -32,7 +32,7 @@ class FinishWebauthnRegistrationService(
     }
 
     @Transactional
-    fun exec(inputData: FinishWebauthnRegistrationInputData) {
+    fun exec(inputData: FinishWebAuthnRegistrationInputData) {
         val origin = Origin.create("http://localhost:3000")
         val flow =
             flowRepository.findByFlowId(FlowId.from(inputData.flowId))

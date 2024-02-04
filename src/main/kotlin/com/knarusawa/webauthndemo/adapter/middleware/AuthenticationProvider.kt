@@ -2,8 +2,8 @@ package com.knarusawa.webauthndemo.adapter.middleware
 
 import com.knarusawa.webauthndemo.adapter.exception.PasswordNotMatchException
 import com.knarusawa.webauthndemo.application.LoginUserDetailsService
-import com.knarusawa.webauthndemo.application.finishWebauthnLogin.FinishWebauthnLoginInputData
-import com.knarusawa.webauthndemo.application.finishWebauthnLogin.FinishWebauthnLoginService
+import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginInputData
+import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginService
 import com.knarusawa.webauthndemo.domain.authenticationToken.WebauthnAssertionAuthenticationToken
 import com.knarusawa.webauthndemo.domain.user.LoginUserDetails
 import com.knarusawa.webauthndemo.domain.user.UserRepository
@@ -20,7 +20,7 @@ class AuthenticationProvider(
     private val userRepository: UserRepository,
     private val loginUserDetailsService: LoginUserDetailsService,
     private val passwordEncoder: PasswordEncoder,
-    private val finishWebauthnLoginService: FinishWebauthnLoginService,
+    private val finishWebauthnLoginService: FinishWebAuthnLoginService,
 ) : org.springframework.security.authentication.AuthenticationProvider {
     private val log = logger()
     override fun supports(authentication: Class<*>?): Boolean {
@@ -31,7 +31,7 @@ class AuthenticationProvider(
         if (authentication is WebauthnAssertionAuthenticationToken) {
             val webAuthnRequest = authentication.principal
 
-            val inputData = FinishWebauthnLoginInputData(
+            val inputData = FinishWebAuthnLoginInputData(
                 flowId = authentication.flowId,
                 credentialId = Base64UrlUtil.encodeToString(webAuthnRequest.credentialId),
                 clientDataJSON = Base64UrlUtil.encodeToString(webAuthnRequest.clientDataJSON),

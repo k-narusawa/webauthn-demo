@@ -2,10 +2,12 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import base64url from "base64url";
 import { useEffect, useState } from "react";
+import { useWebAuthn } from "@/hooks/userWebAuthn";
 
 const HomePage = () => {
   const [userinfo, setUserInfo] = useState<any>();
   const router = useRouter();
+  const {startRegistration, createCredentials, registerCredentials} = useWebAuthn();
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
 
   useEffect(() => {
@@ -25,119 +27,9 @@ const HomePage = () => {
   }, [apiHost, router]);
 
   const handleRegister = async () => {
-    await axios(`${apiHost}/api/v1/webauthn/registration/start`, {
-      withCredentials: true,
-    })
-      .then((response) => {
-        createCredential(response.data);
-      })
-      .catch((error) => {
-        console.log(error.response.data);
-      });
-  };
-
-  const createCredential = async (options: any) => {
-    console.log(options);
-    options.user.id = bufferDecode(options.user.id);
-    options.challenge = bufferDecode(options.challenge);
-
-    console.log(options);
-    await navigator.credentials
-      .create({
-        publicKey: options,
-      })
-      .then((response) => {
-        console.log(response);
-        registerCredentials(options.flowId, response);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const registerCredentials = async (flowId: string, credentials: any) => {
-    await axios(`${apiHost}/api/v1/webauthn/registration/finish`, {
-      method: "POST",
-      withCredentials: true,
-      data: {
-        flowId: flowId,
-        id: credentials.id,
-        rawId: base64url.encode(credentials.rawId),
-        type: credentials.type,
-        response: {
-          attestationObject: base64url.encode(
-            credentials.response.attestationObject
-          ),
-          clientDataJSON: base64url.encode(credentials.response.clientDataJSON),
-        },
-      },
-    })
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.log(error.response.data);
-      });
-  };
-
-  const handleAuthenticate = async () => {
-    await axios(`${apiHost}/api/v1/webauthn/authenticate/start`, {
-      withCredentials: true,
-    })
-      .then((response) => {
-        console.log(response.data);
-        getCredentials(response.data);
-      })
-      .catch((error) => {
-        console.log(error.response.data);
-      });
-  };
-
-  const getCredentials = async (options: any) => {
-    options.challenge = bufferDecode(options.challenge);
-    for (let cred of options.allowCredentials) {
-      cred.id = bufferDecode(cred.id);
-    }
-    console.log(options);
-
-    await navigator.credentials
-      .get({
-        publicKey: options,
-      })
-      .then((response) => {
-        console.log(response);
-        postCredentials(options.flowId, response);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const postCredentials = async (flowId: string, credentials: any) => {
-    await axios(`${apiHost}/api/v1/webauthn/authenticate/finish`, {
-      method: "POST",
-      withCredentials: true,
-      data: {
-        flowId: flowId,
-        id: credentials.id,
-        rawId: base64url.encode(credentials.rawId),
-        type: credentials.type,
-        response: {
-          authenticatorData: base64url.encode(
-            credentials.response.authenticatorData
-          ),
-          clientDataJSON: base64url.encode(credentials.response.clientDataJSON),
-          signature: base64url.encode(credentials.response.signature),
-          userHandle: base64url.encode(credentials.response.userHandle),
-        },
-      },
-    })
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.log(error.response.data);
-      });
+    const startResponse = await startRegistration();
+    const credentials = await createCredentials(startResponse);
+    await registerCredentials(startResponse.flowId, credentials);
   };
 
   const handleLogout = async () => {
@@ -145,21 +37,14 @@ const HomePage = () => {
       method: "POST",
       withCredentials: true,
     })
-      .then(function (response) {
+      .then((response) => {
         console.log(response.data);
         router.push("/login");
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log(error.response.data);
       });
   };
-
-  function bufferDecode(value: string) {
-    return Uint8Array.from(
-      atob(value.replace(/-/g, "+").replace(/_/g, "/")),
-      (c) => c.charCodeAt(0)
-    );
-  }
 
   return (
     <>
@@ -172,13 +57,6 @@ const HomePage = () => {
         className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
       >
         Registration
-      </button>
-      <button
-        onClick={handleAuthenticate}
-        type="button"
-        className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
-      >
-        WebAuthn Login
       </button>
       <button
         onClick={handleLogout}

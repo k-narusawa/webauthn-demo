@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.application.startWebauthnLogin
+package com.knarusawa.webauthndemo.application.startWebAuthnLogin
 
 import com.knarusawa.webauthndemo.domain.flow.Flow
 import com.knarusawa.webauthndemo.domain.flow.FlowRepository
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 
 
 @Service
-class StartWebauthnLoginService(
+class StartWebAuthnLoginService(
     private val flowRepository: FlowRepository,
     private val userCredentialsRepository: UserCredentialsRepository,
     private val userRepository: UserRepository,
@@ -24,7 +24,7 @@ class StartWebauthnLoginService(
     }
 
     @Transactional
-    fun exec(inputData: StartWebauthnLoginInputData): StartWebauthnLoginOutputData {
+    fun exec(inputData: StartWebauthnLoginInputData): StartWebAuthnLoginOutputData {
         val challenge = DefaultChallenge()
         val user = userRepository.findByUsername(Username.of(inputData.username))
             ?: throw IllegalArgumentException("User not found")
@@ -64,7 +64,7 @@ class StartWebauthnLoginService(
         )
         flowRepository.save(flow)
 
-        return StartWebauthnLoginOutputData(
+        return StartWebAuthnLoginOutputData(
             flowId = flow.flowId,
             options = options
         )

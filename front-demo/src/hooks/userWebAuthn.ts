@@ -6,6 +6,63 @@ export const useWebAuthn = () => {
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
   const router = useRouter();
 
+  const startRegistration = async () => {
+    return await axios(`${apiHost}/api/v1/webauthn/registration/start`, {
+      withCredentials: true,
+    })
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.log(error.response.data);
+      });
+    };
+
+  const createCredentials = async (options: any) => {
+    options.user.id = bufferDecode(options.user.id);
+    options.challenge = bufferDecode(options.challenge);
+
+    return await navigator.credentials
+      .create({
+        publicKey: options,
+      })
+      .then((response) => {
+        console.log(response);
+        if(!response){
+          throw new Error('No response from navigator.credentials.create');
+        }
+        return response;
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  };
+
+  const registerCredentials = async (flowId: string, credentials: any) => {
+    await axios(`${apiHost}/api/v1/webauthn/registration/finish`, {
+      method: "POST",
+      withCredentials: true,
+      data: {
+        flowId: flowId,
+        id: credentials.id,
+        rawId: base64url.encode(credentials.rawId),
+        type: credentials.type,
+        response: {
+          attestationObject: base64url.encode(
+            credentials.response.attestationObject
+          ),
+          clientDataJSON: base64url.encode(credentials.response.clientDataJSON),
+        },
+      },
+    })
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        throw new Error(error.response.data);
+      });
+  };
+
   const getCredentials = async (options: any) => {
     options.challenge = bufferDecode(options.challenge);
     for (let cred of options.allowCredentials) {
@@ -54,6 +111,9 @@ export const useWebAuthn = () => {
   };
 
   return {
+    startRegistration,
+    createCredentials,
+    registerCredentials,
     getCredentials,
     postCredentials
   };

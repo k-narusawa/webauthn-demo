@@ -1,6 +1,6 @@
-package com.knarusawa.webauthndemo.application.finishWebauthnLogin
+package com.knarusawa.webauthndemo.application.finishWebAuthnLogin
 
-data class FinishWebauthnLoginInputData(
+data class FinishWebAuthnLoginInputData(
     val flowId: String,
     val credentialId: String,
     val clientDataJSON: String,

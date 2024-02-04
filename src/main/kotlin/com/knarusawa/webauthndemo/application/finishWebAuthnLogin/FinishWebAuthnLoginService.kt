@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.application.finishWebauthnLogin
+package com.knarusawa.webauthndemo.application.finishWebAuthnLogin
 
 import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
 import com.knarusawa.webauthndemo.domain.flow.FlowId
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 
 
 @Service
-class FinishWebauthnLoginService(
+class FinishWebAuthnLoginService(
     private val flowRepository: FlowRepository,
     private val credentialsRepository: CredentialsRepository,
     private val userCredentialsRepository: UserCredentialsRepository
@@ -30,7 +30,7 @@ class FinishWebauthnLoginService(
     }
 
     @Transactional
-    fun exec(inputData: FinishWebauthnLoginInputData): FinishWebauthnLoginOutputData {
+    fun exec(inputData: FinishWebAuthnLoginInputData): FinishWebAuthnLoginOutputData {
         val origin = Origin.create("http://localhost:3000")
         val flow = flowRepository.findByFlowId(FlowId.from(inputData.flowId))
             ?: throw IllegalArgumentException("flow is not found")
@@ -98,6 +98,6 @@ class FinishWebauthnLoginService(
             throw ex
         }
 
-        return FinishWebauthnLoginOutputData(userId = flow.userId)
+        return FinishWebAuthnLoginOutputData(userId = flow.userId)
     }
 }
