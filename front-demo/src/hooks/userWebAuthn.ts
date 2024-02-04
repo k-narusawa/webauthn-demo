@@ -34,6 +34,7 @@ export const useWebAuthn = () => {
         return response;
       })
       .catch((error) => {
+        console.log(error);
         throw new Error(error);
       });
   };
@@ -83,6 +84,7 @@ export const useWebAuthn = () => {
   };
 
   const postCredentials = async (flowId: string, credentials: any) => {
+    console.log(credentials);
     await axios(`${apiHost}/api/v1/webauthn/login`, {
       method: "POST",
       withCredentials: true,
@@ -97,7 +99,7 @@ export const useWebAuthn = () => {
           ),
           clientDataJSON: base64url.encode(credentials.response.clientDataJSON),
           signature: base64url.encode(credentials.response.signature),
-          userHandle: base64url.encode(credentials.response.userHandle),
+          userHandle: credentials.response.userHandle ? base64url.encode(credentials.response.userHandle) : null,
         },
       },
     })

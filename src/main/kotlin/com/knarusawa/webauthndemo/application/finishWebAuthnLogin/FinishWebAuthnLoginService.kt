@@ -40,7 +40,7 @@ class FinishWebAuthnLoginService(
 
         val authenticationRequest = AuthenticationRequest(
             /* credentialId = */      Base64UrlUtil.decode(inputData.credentialId),
-            /* userHandle = */        Base64UrlUtil.decode(inputData.userHandle),
+            /* userHandle = */        inputData.userHandle?.let { Base64UrlUtil.decode(it) },
             /* authenticatorData = */ Base64UrlUtil.decode(inputData.authenticatorData),
             /* clientDataJSON = */    Base64UrlUtil.decode(inputData.clientDataJSON),
             /* signature = */         Base64UrlUtil.decode(inputData.signature),

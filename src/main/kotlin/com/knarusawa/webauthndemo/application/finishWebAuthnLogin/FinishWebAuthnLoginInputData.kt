@@ -6,5 +6,5 @@ data class FinishWebAuthnLoginInputData(
     val clientDataJSON: String,
     val authenticatorData: String,
     val signature: String,
-    val userHandle: String
+    val userHandle: String?
 )

@@ -45,6 +45,7 @@ class StartWebAuthnLoginService(
                 Base64UrlUtil.decode(it.credentialId),
                 HashSet(
                     listOf(
+                        AuthenticatorTransport.HYBRID,
                         AuthenticatorTransport.USB,
                         AuthenticatorTransport.BLE,
                         AuthenticatorTransport.INTERNAL,
