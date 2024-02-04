@@ -6,6 +6,7 @@ import com.knarusawa.webauthndemo.domain.user.UserId
 import com.webauthn4j.data.*
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
 import com.webauthn4j.data.client.challenge.DefaultChallenge
+import com.webauthn4j.util.Base64UrlUtil
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
@@ -36,27 +37,27 @@ class StartWebAuthnRegistrationService(
         )
 
         val user = PublicKeyCredentialUserEntity(
-            /* id = */          inputData.userId.toByteArray(),
+            /* id = */          Base64UrlUtil.decode(inputData.userId),
             /* name = */        inputData.username,
             /* displayName = */ inputData.username,
         )
 
         val authenticatorSelectionCriteria = AuthenticatorSelectionCriteria(
-            AuthenticatorAttachment.CROSS_PLATFORM,
-            false,
-            UserVerificationRequirement.REQUIRED
+            /* authenticatorAttachment = */ AuthenticatorAttachment.CROSS_PLATFORM,
+            /* requireResidentKey =      */ false,
+            /* userVerification =        */ UserVerificationRequirement.REQUIRED
         )
 
         val options = PublicKeyCredentialCreationOptions(
-            PublicKeyCredentialRpEntity(rpId, "webauthn-demo"),
-            user,
-            challenge,
-            pubKeys,
-            TimeUnit.SECONDS.toMillis(6000),
-            null,
-            authenticatorSelectionCriteria,
-            AttestationConveyancePreference.NONE,
-            null,
+            /* rp =                     */ PublicKeyCredentialRpEntity(rpId, "webauthn-demo"),
+            /* user =                   */ user,
+            /* challenge =              */ challenge,
+            /* pubKeyCredParams =       */ pubKeys,
+            /* timeout =                */ TimeUnit.SECONDS.toMillis(6000),
+            /* excludeCredentials =     */ null,
+            /* authenticatorSelection = */ authenticatorSelectionCriteria,
+            /* attestation =            */ AttestationConveyancePreference.NONE,
+            /* extensions =             */ null,
         )
 
         val flow =
