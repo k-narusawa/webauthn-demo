@@ -38,6 +38,8 @@ class SecurityConfig {
             it.configurationSource(corsConfigurationSource())
         }
         http.csrf {
+            // デモなのでcsrfは無効化
+            // 実際に使う場合はcsrf用のエンドポイントを作成
             it.disable()
         }
         http.authorizeHttpRequests {
