@@ -56,7 +56,7 @@ export const useWebAuthn = () => {
     })
       .then((response) => {
         console.log(response.data);
-        // alert("Registration successful");
+        alert("Registration successful");
       })
       .catch((error) => {
         alert("Registration failed - " + error.response.data);

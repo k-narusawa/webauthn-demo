@@ -74,8 +74,11 @@ class FinishWebAuthnRegistrationService(
         }
 
         val authenticator = AuthenticatorImpl(
+            /* attestedCredentialData = */
             registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
+            /* attestationStatement =   */
             registrationData.attestationObject!!.attestationStatement,
+            /* counter =                */
             registrationData.attestationObject!!.authenticatorData.signCount,
         )
 
