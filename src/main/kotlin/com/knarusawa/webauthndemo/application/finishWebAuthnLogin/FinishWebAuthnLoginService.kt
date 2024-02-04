@@ -10,7 +10,8 @@ import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.exception.DataConversionException
 import com.webauthn4j.converter.util.ObjectConverter
-import com.webauthn4j.data.*
+import com.webauthn4j.data.AuthenticationParameters
+import com.webauthn4j.data.AuthenticationRequest
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
@@ -49,21 +50,6 @@ class FinishWebAuthnLoginService(
         val userCredentials =
             userCredentialsRepository.findByUserId(UserId.from(flow.userId.value()))
 
-        val allowCredentials = userCredentials.map {
-            PublicKeyCredentialDescriptor(
-                PublicKeyCredentialType.PUBLIC_KEY,
-                Base64UrlUtil.decode(it.credentialId),
-                HashSet(
-                    listOf(
-                        AuthenticatorTransport.USB,
-                        AuthenticatorTransport.BLE,
-                        AuthenticatorTransport.INTERNAL,
-                        AuthenticatorTransport.NFC
-                    )
-                )
-            )
-        }
-
         val credentials = credentialsRepository.findByCredentialId(inputData.credentialId)
             ?: throw IllegalArgumentException("credential is not found")
 
@@ -80,7 +66,7 @@ class FinishWebAuthnLoginService(
         val authenticationParameter = AuthenticationParameters(
             serverProperty,
             authenticator,
-            allowCredentials.map { it.id },
+            userCredentials.map { Base64UrlUtil.decode(it.credentialId) },
             false
         )
 
