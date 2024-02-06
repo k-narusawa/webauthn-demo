@@ -1,8 +1,9 @@
 import axios from "axios";
 import { useRouter } from "next/router";
-import base64url from "base64url";
 import { useEffect, useState } from "react";
 import { useWebAuthn } from "@/hooks/userWebAuthn";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const HomePage = () => {
   const [userinfo, setUserInfo] = useState<any>();
@@ -38,18 +39,19 @@ const HomePage = () => {
       method: "POST",
       withCredentials: true,
     })
-      .then((response) => {
-        console.log(response.data);
+      .then(() => {
         router.push("/login");
       })
       .catch((error) => {
         console.log(error.response.data);
+        toast.error("Failed to logout");
       });
   };
 
   return (
     <>
       <h1>Home</h1>
+      <ToastContainer />
       <label>Username: {userinfo?.username}</label>
       <br />
       <button

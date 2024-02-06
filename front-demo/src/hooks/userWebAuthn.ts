@@ -1,6 +1,7 @@
 import axios from "axios";
 import base64url from "base64url";
 import { useRouter } from "next/router";
+import { toast } from "react-toastify";
 
 export const useWebAuthn = () => {
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
@@ -17,7 +18,8 @@ export const useWebAuthn = () => {
         return response.data;
       })
       .catch((error) => {
-        console.log(error.response.data);
+        console.log(error);
+        toast.error("Error starting registration");
       });
   };
 
@@ -36,7 +38,8 @@ export const useWebAuthn = () => {
         return response;
       })
       .catch((error) => {
-        throw new Error(error);
+        console.log(error);
+        toast.error("Error creating");
       });
   };
 
@@ -59,10 +62,11 @@ export const useWebAuthn = () => {
     })
       .then((response) => {
         console.log(response.data);
-        alert("Registration successful");
+        toast.success("Registered successfully");
       })
       .catch((error) => {
-        alert("Registration failed - " + error.response.data);
+        console.log(error.response.data);
+        toast.error("Error registering");
       });
   };
 
@@ -82,6 +86,7 @@ export const useWebAuthn = () => {
       })
       .catch((error) => {
         console.log(error);
+        toast.error("Error getting credentials");
       });
   };
 
@@ -113,6 +118,7 @@ export const useWebAuthn = () => {
       })
       .catch((error) => {
         console.log(error.response.data);
+        toast.error("Error logging in");
       });
   };
 

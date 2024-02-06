@@ -3,10 +3,12 @@ import { useWebAuthn } from "@/hooks/userWebAuthn";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { FormEventHandler, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LoginPage = () => {
   const router = useRouter();
-  const { getCredentials, postCredentials} = useWebAuthn();
+  const { getCredentials, postCredentials } = useWebAuthn();
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
 
   useEffect(() => {
@@ -49,6 +51,7 @@ const LoginPage = () => {
       })
       .catch(function (error) {
         console.log(error.response.data);
+        toast.error("Invalid username or password");
       });
   };
 
@@ -58,9 +61,9 @@ const LoginPage = () => {
     const formData = new FormData(e.currentTarget);
     const username = formData.get("username") as string;
 
-    const options = await axios(`${apiHost}/api/v1/webauthn/login/request`, { 
+    const options = await axios(`${apiHost}/api/v1/webauthn/login/request`, {
       params: { username: username },
-      withCredentials: true 
+      withCredentials: true,
     })
       .then(function (response) {
         console.log(response.data);
@@ -72,12 +75,16 @@ const LoginPage = () => {
 
     const credentials = await getCredentials(options);
     await postCredentials(options.flowId, credentials);
-  }
+  };
 
   return (
     <>
       <h1>Login</h1>
-      <LoginForm handleLogin={handleLogin} handleWebAuthnLogin={handleWebAuthnLogin} />
+      <ToastContainer />
+      <LoginForm
+        handleLogin={handleLogin}
+        handleWebAuthnLogin={handleWebAuthnLogin}
+      />
     </>
   );
 };
