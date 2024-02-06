@@ -24,6 +24,10 @@ class StartWebAuthnRegistrationService(
     fun exec(inputData: StartWebAuthnRegistrationInputData): StartWebAuthnRegistrationOutputData {
         val rpId = PR_ID
         val challenge = DefaultChallenge()
+        val authenticatorAttachment = when (inputData.authenticatorAttachment) {
+            StartWebAuthnRegistrationInputData.AuthenticatorAttachment.CROSS_PLATFORM -> AuthenticatorAttachment.CROSS_PLATFORM
+            StartWebAuthnRegistrationInputData.AuthenticatorAttachment.PLATFORM -> AuthenticatorAttachment.PLATFORM
+        }
 
         val pubKeyCredParams = listOf(
                 PublicKeyCredentialParameters(
@@ -43,7 +47,7 @@ class StartWebAuthnRegistrationService(
         )
 
         val authenticatorSelectionCriteria = AuthenticatorSelectionCriteria(
-                /* authenticatorAttachment = */ AuthenticatorAttachment.CROSS_PLATFORM,
+                /* authenticatorAttachment = */ authenticatorAttachment,
                 /* requireResidentKey =      */ false,
                 /* userVerification =        */ UserVerificationRequirement.REQUIRED
         )

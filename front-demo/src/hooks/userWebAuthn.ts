@@ -6,8 +6,11 @@ export const useWebAuthn = () => {
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
   const router = useRouter();
 
-  const startRegistration = async () => {
+  const startRegistration = async (attachment: string) => {
     return await axios(`${apiHost}/api/v1/webauthn/registration/start`, {
+      params: {
+        authenticatorAttachment: attachment,
+      },
       withCredentials: true,
     })
       .then((response) => {
@@ -16,7 +19,7 @@ export const useWebAuthn = () => {
       .catch((error) => {
         console.log(error.response.data);
       });
-    };
+  };
 
   const createCredentials = async (options: any) => {
     options.user.id = bufferDecode(options.user.id);
@@ -27,8 +30,8 @@ export const useWebAuthn = () => {
         publicKey: options,
       })
       .then((response) => {
-        if(!response){
-          throw new Error('No response from navigator.credentials.create');
+        if (!response) {
+          throw new Error("No response from navigator.credentials.create");
         }
         return response;
       })
@@ -98,7 +101,9 @@ export const useWebAuthn = () => {
           ),
           clientDataJSON: base64url.encode(credentials.response.clientDataJSON),
           signature: base64url.encode(credentials.response.signature),
-          userHandle: credentials.response.userHandle ? base64url.encode(credentials.response.userHandle) : null,
+          userHandle: credentials.response.userHandle
+            ? base64url.encode(credentials.response.userHandle)
+            : null,
         },
       },
     })
@@ -116,9 +121,9 @@ export const useWebAuthn = () => {
     createCredentials,
     registerCredentials,
     getCredentials,
-    postCredentials
+    postCredentials,
   };
-}
+};
 
 function bufferDecode(value: string) {
   return Uint8Array.from(

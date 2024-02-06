@@ -7,7 +7,8 @@ import { useWebAuthn } from "@/hooks/userWebAuthn";
 const HomePage = () => {
   const [userinfo, setUserInfo] = useState<any>();
   const router = useRouter();
-  const {startRegistration, createCredentials, registerCredentials} = useWebAuthn();
+  const { startRegistration, createCredentials, registerCredentials } =
+    useWebAuthn();
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
 
   useEffect(() => {
@@ -26,8 +27,8 @@ const HomePage = () => {
     fetchUserInfo();
   }, [apiHost, router]);
 
-  const handleRegister = async () => {
-    const startResponse = await startRegistration();
+  const handleRegister = async (attachment: string) => {
+    const startResponse = await startRegistration(attachment);
     const credentials = await createCredentials(startResponse);
     await registerCredentials(startResponse.flowId, credentials);
   };
@@ -52,12 +53,25 @@ const HomePage = () => {
       <label>Username: {userinfo?.username}</label>
       <br />
       <button
-        onClick={handleRegister}
+        onClick={() => {
+          handleRegister("cross-platform");
+        }}
         type="button"
         className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
       >
-        Registration
+        CROSS_PLATFORM Registration
       </button>
+      <br />
+      <button
+        onClick={() => {
+          handleRegister("platform");
+        }}
+        type="button"
+        className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
+      >
+        PLATFORM Registration
+      </button>
+      <br />
       <button
         onClick={handleLogout}
         type="button"
