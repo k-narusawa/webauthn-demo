@@ -25,6 +25,7 @@ class FinishWebAuthnLoginService(
 ) {
     companion object {
         private const val PR_ID = "localhost"
+        private val attestedCredentialDataConverter = AttestedCredentialDataConverter(ObjectConverter())
     }
 
     @Transactional
@@ -38,8 +39,6 @@ class FinishWebAuthnLoginService(
 
         val credentials = credentialsRepository.findByCredentialId(inputData.credentialId)
                 ?: throw IllegalArgumentException("credential is not found")
-
-        val attestedCredentialDataConverter = AttestedCredentialDataConverter(ObjectConverter())
 
         val authenticator = AuthenticatorImpl(
                 /* attestedCredentialData = */
@@ -78,7 +77,7 @@ class FinishWebAuthnLoginService(
         } catch (ex: Exception) {
             throw ex
         }
-        
+
         credentials.updateCounter(authenticationData.authenticatorData!!.signCount)
         credentialsRepository.save(credentials)
 
