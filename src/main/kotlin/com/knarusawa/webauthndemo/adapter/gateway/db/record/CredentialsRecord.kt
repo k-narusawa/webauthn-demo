@@ -13,6 +13,9 @@ data class CredentialsRecord(
         @Column(name = "credential_id")
         val credentialId: String,
 
+        @Column(name = "user_id")
+        val userId: String,
+
         @Column(name = "serialized_attested_credential_data")
         val serializedAttestedCredentialData: String,
 
@@ -34,6 +37,7 @@ data class CredentialsRecord(
     companion object {
         fun from(credentials: Credentials) = CredentialsRecord(
                 credentialId = credentials.credentialId,
+                userId = credentials.userId,
                 serializedAttestedCredentialData = credentials.serializedAttestedCredentialData,
                 serializedEnvelope = credentials.serializedEnvelope,
                 serializedTransports = credentials.serializedTransports,

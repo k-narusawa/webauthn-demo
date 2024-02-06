@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const HomePage = () => {
   const [userinfo, setUserInfo] = useState<any>();
+  const [userCredentials, setUserCredentials] = useState<any>();
   const router = useRouter();
   const { startRegistration, createCredentials, registerCredentials } =
     useWebAuthn();
@@ -25,7 +26,21 @@ const HomePage = () => {
           router.push("/login");
         });
     };
+    const fetchUserCredentials = async () => {
+      await axios(`${apiHost}/api/v1/users/credentials`, {
+        withCredentials: true,
+      })
+        .then((response) => {
+          console.log(response.data);
+          setUserCredentials(response.data);
+        })
+        .catch((error) => {
+          console.log(error.response.data);
+        });
+    };
+
     fetchUserInfo();
+    fetchUserCredentials();
   }, [apiHost, router]);
 
   const handleRegister = async (attachment: string) => {

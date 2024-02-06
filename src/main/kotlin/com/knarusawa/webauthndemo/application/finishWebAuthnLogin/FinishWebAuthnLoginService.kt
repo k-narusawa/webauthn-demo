@@ -3,8 +3,6 @@ package com.knarusawa.webauthndemo.application.finishWebAuthnLogin
 import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
 import com.knarusawa.webauthndemo.domain.flow.FlowId
 import com.knarusawa.webauthndemo.domain.flow.FlowRepository
-import com.knarusawa.webauthndemo.domain.user.UserId
-import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentialsRepository
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
@@ -24,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional
 class FinishWebAuthnLoginService(
         private val flowRepository: FlowRepository,
         private val credentialsRepository: CredentialsRepository,
-        private val userCredentialsRepository: UserCredentialsRepository
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -39,6 +36,27 @@ class FinishWebAuthnLoginService(
 
         val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
 
+        val credentials = credentialsRepository.findByCredentialId(inputData.credentialId)
+                ?: throw IllegalArgumentException("credential is not found")
+
+        val attestedCredentialDataConverter = AttestedCredentialDataConverter(ObjectConverter())
+
+        val authenticator = AuthenticatorImpl(
+                /* attestedCredentialData = */
+                attestedCredentialDataConverter.convert(
+                        Base64UrlUtil.decode(credentials.serializedAttestedCredentialData)
+                ),
+                /* attestationStatement = */   null,
+                /* counter = */                credentials.counter
+        )
+
+        val authenticationParameter = AuthenticationParameters(
+                serverProperty,
+                authenticator,
+                listOf(Base64UrlUtil.decode(credentials.credentialId)),
+                false
+        )
+
         val authenticationRequest = AuthenticationRequest(
                 /* credentialId = */      Base64UrlUtil.decode(inputData.credentialId),
                 /* userHandle = */        inputData.userHandle?.let { Base64UrlUtil.decode(it) },
@@ -47,30 +65,7 @@ class FinishWebAuthnLoginService(
                 /* signature = */         Base64UrlUtil.decode(inputData.signature),
         )
 
-        val userCredentials =
-                userCredentialsRepository.findByUserId(UserId.from(flow.userId.value()))
-
-        val credentials = credentialsRepository.findByCredentialId(inputData.credentialId)
-                ?: throw IllegalArgumentException("credential is not found")
-
-        val attestedCredentialDataConverter = AttestedCredentialDataConverter(ObjectConverter())
-
-        val authenticator = AuthenticatorImpl(
-                /* attestedCredentialData = */ attestedCredentialDataConverter.convert(
-                Base64UrlUtil.decode(credentials.serializedAttestedCredentialData)
-        ),
-                /* attestationStatement = */   null,
-                /* counter = */                credentials.counter
-        )
-
-        val authenticationParameter = AuthenticationParameters(
-                serverProperty,
-                authenticator,
-                userCredentials.map { Base64UrlUtil.decode(it.credentialId) },
-                false
-        )
-
-        try {
+        val authenticationData = try {
             WebAuthnManager.createNonStrictWebAuthnManager().parse(authenticationRequest);
         } catch (ex: DataConversionException) {
             ex.printStackTrace()
@@ -83,6 +78,9 @@ class FinishWebAuthnLoginService(
         } catch (ex: Exception) {
             throw ex
         }
+        
+        credentials.updateCounter(authenticationData.authenticatorData!!.signCount)
+        credentialsRepository.save(credentials)
 
         return FinishWebAuthnLoginOutputData(userId = flow.userId)
     }

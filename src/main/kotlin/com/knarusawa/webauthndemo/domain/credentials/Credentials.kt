@@ -8,17 +8,22 @@ import com.webauthn4j.util.Base64UrlUtil
 
 class Credentials private constructor(
         val credentialId: String,
+        val userId: String,
         val serializedAttestedCredentialData: String,
         val serializedEnvelope: String,
         val serializedTransports: String,
         val serializedAuthenticatorExtensions: String,
         val serializedClientExtensions: String,
-        val counter: Long,
+        counter: Long,
 ) {
+    var counter: Long = counter
+        private set
+
     companion object {
         fun of(
+                credentialId: ByteArray?,
+                userId: String,
                 authenticator: AuthenticatorImpl,
-                credentialId: ByteArray?
         ): Credentials {
             val objectConverter = ObjectConverter()
             val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
@@ -32,6 +37,7 @@ class Credentials private constructor(
 
             return Credentials(
                     credentialId = Base64UrlUtil.encodeToString(credentialId),
+                    userId = userId,
                     serializedAttestedCredentialData = Base64UrlUtil.encodeToString(
                             serializedAttestedCredentialData
                     ),
@@ -59,6 +65,7 @@ class Credentials private constructor(
 
         fun from(record: CredentialsRecord) = Credentials(
                 credentialId = record.credentialId,
+                userId = record.userId,
                 serializedAttestedCredentialData = record.serializedAttestedCredentialData,
                 serializedEnvelope = record.serializedEnvelope,
                 serializedTransports = record.serializedTransports,
@@ -66,5 +73,9 @@ class Credentials private constructor(
                 serializedClientExtensions = record.serializedClientExtensions,
                 counter = record.counter,
         )
+    }
+
+    fun updateCounter(counter: Long) {
+        this.counter = counter
     }
 }

@@ -19,4 +19,10 @@ class CredentialsRepositoryImpl(
             Credentials.from(it)
         }
     }
+
+    override fun findByUserId(userId: String): List<Credentials> {
+        return credentialsDao.findByUserId(userId).map {
+            Credentials.from(it)
+        }
+    }
 }

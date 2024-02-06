@@ -1,6 +1,7 @@
 CREATE TABLE credentials
 (
     credential_id                       VARCHAR(255) PRIMARY KEY NOT NULL,
+    user_id                             VARCHAR(255)             NOT NULL,
     serialized_attested_credential_data VARCHAR(255)             NOT NULL,
     serialized_envelope                 VARCHAR(255)             NOT NULL,
     serialized_transports               VARCHAR(255)             NOT NULL,

@@ -5,8 +5,6 @@ import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
 import com.knarusawa.webauthndemo.domain.flow.FlowId
 import com.knarusawa.webauthndemo.domain.flow.FlowRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
-import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentials
-import com.knarusawa.webauthndemo.domain.userCredentials.UserCredentialsRepository
 import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
@@ -27,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional
 class FinishWebAuthnRegistrationService(
         private val flowRepository: FlowRepository,
         private val credentialsRepository: CredentialsRepository,
-        private val userCredentialsRepository: UserCredentialsRepository
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -85,15 +82,13 @@ class FinishWebAuthnRegistrationService(
         val credentialId =
                 registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
 
-        val credentials = Credentials.of(authenticator = authenticator, credentialId = credentialId)
-
-        val userCredentials = UserCredentials.of(
-                credentialId = Base64UrlUtil.encodeToString(credentialId),
-                userId = UserId.from(inputData.userId)
+        val credentials = Credentials.of(
+                credentialId = credentialId,
+                userId = inputData.userId,
+                authenticator = authenticator,
         )
 
         credentialsRepository.save(credentials)
-        userCredentialsRepository.save(userCredentials)
         flowRepository.deleteByUserId(UserId.from(inputData.userId))
     }
 }
