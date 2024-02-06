@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationProvider(
-    private val userRepository: UserRepository,
-    private val loginUserDetailsService: LoginUserDetailsService,
-    private val passwordEncoder: PasswordEncoder,
-    private val finishWebauthnLoginService: FinishWebAuthnLoginService,
+        private val userRepository: UserRepository,
+        private val loginUserDetailsService: LoginUserDetailsService,
+        private val passwordEncoder: PasswordEncoder,
+        private val finishWebauthnLoginService: FinishWebAuthnLoginService,
 ) : org.springframework.security.authentication.AuthenticationProvider {
     override fun supports(authentication: Class<*>?): Boolean {
         return AbstractAuthenticationToken::class.java.isAssignableFrom(authentication)

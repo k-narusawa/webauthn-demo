@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationFailureHandler() :
-    org.springframework.security.web.authentication.AuthenticationFailureHandler {
+        org.springframework.security.web.authentication.AuthenticationFailureHandler {
     private val log = logger()
     override fun onAuthenticationFailure(
-        request: HttpServletRequest?,
-        response: HttpServletResponse?,
-        exception: AuthenticationException?
+            request: HttpServletRequest?,
+            response: HttpServletResponse?,
+            exception: AuthenticationException?
     ) {
         val remoteAddr = request?.remoteAddr
         val userAgent = request?.getHeader("User-Agent")

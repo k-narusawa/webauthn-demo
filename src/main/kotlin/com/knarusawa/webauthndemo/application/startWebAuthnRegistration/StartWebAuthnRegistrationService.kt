@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class StartWebAuthnRegistrationService(
-    private val flowRepository: FlowRepository
+        private val flowRepository: FlowRepository
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -26,42 +26,42 @@ class StartWebAuthnRegistrationService(
         val challenge = DefaultChallenge()
 
         val pubKeyCredParams = listOf(
-            PublicKeyCredentialParameters(
-                PublicKeyCredentialType.PUBLIC_KEY,
-                COSEAlgorithmIdentifier.ES256
-            ),
-            PublicKeyCredentialParameters(
-                PublicKeyCredentialType.PUBLIC_KEY,
-                COSEAlgorithmIdentifier.RS256
-            ),
+                PublicKeyCredentialParameters(
+                        PublicKeyCredentialType.PUBLIC_KEY,
+                        COSEAlgorithmIdentifier.ES256
+                ),
+                PublicKeyCredentialParameters(
+                        PublicKeyCredentialType.PUBLIC_KEY,
+                        COSEAlgorithmIdentifier.RS256
+                ),
         )
 
         val user = PublicKeyCredentialUserEntity(
-            /* id = */          Base64UrlUtil.decode(inputData.userId),
-            /* name = */        inputData.username,
-            /* displayName = */ inputData.username,
+                /* id = */          Base64UrlUtil.decode(inputData.userId),
+                /* name = */        inputData.username,
+                /* displayName = */ inputData.username,
         )
 
         val authenticatorSelectionCriteria = AuthenticatorSelectionCriteria(
-            /* authenticatorAttachment = */ AuthenticatorAttachment.CROSS_PLATFORM,
-            /* requireResidentKey =      */ false,
-            /* userVerification =        */ UserVerificationRequirement.REQUIRED
+                /* authenticatorAttachment = */ AuthenticatorAttachment.CROSS_PLATFORM,
+                /* requireResidentKey =      */ false,
+                /* userVerification =        */ UserVerificationRequirement.REQUIRED
         )
 
         val options = PublicKeyCredentialCreationOptions(
-            /* rp =                     */ PublicKeyCredentialRpEntity(rpId, "webauthn-demo"),
-            /* user =                   */ user,
-            /* challenge =              */ challenge,
-            /* pubKeyCredParams =       */ pubKeyCredParams,
-            /* timeout =                */ TimeUnit.SECONDS.toMillis(6000),
-            /* excludeCredentials =     */ null,
-            /* authenticatorSelection = */ authenticatorSelectionCriteria,
-            /* attestation =            */ AttestationConveyancePreference.NONE,
-            /* extensions =             */ null,
+                /* rp =                     */ PublicKeyCredentialRpEntity(rpId, "webauthn-demo"),
+                /* user =                   */ user,
+                /* challenge =              */ challenge,
+                /* pubKeyCredParams =       */ pubKeyCredParams,
+                /* timeout =                */ TimeUnit.SECONDS.toMillis(6000),
+                /* excludeCredentials =     */ null,
+                /* authenticatorSelection = */ authenticatorSelectionCriteria,
+                /* attestation =            */ AttestationConveyancePreference.NONE,
+                /* extensions =             */ null,
         )
 
         val flow =
-            Flow.of(userId = UserId.from(inputData.userId), challenge = challenge)
+                Flow.of(userId = UserId.from(inputData.userId), challenge = challenge)
 
         flowRepository.save(flow)
 

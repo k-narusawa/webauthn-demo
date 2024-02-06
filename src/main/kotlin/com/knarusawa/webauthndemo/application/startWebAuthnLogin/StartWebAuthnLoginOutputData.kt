@@ -4,6 +4,6 @@ import com.knarusawa.webauthndemo.domain.flow.FlowId
 import com.webauthn4j.data.PublicKeyCredentialRequestOptions
 
 data class StartWebAuthnLoginOutputData(
-    val flowId: FlowId,
-    val options: PublicKeyCredentialRequestOptions
+        val flowId: FlowId,
+        val options: PublicKeyCredentialRequestOptions
 )

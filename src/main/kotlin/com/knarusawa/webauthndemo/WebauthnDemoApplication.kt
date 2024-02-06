@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class WebauthnDemoApplication
 
 fun main(args: Array<String>) {
-	runApplication<WebauthnDemoApplication>(*args)
+    runApplication<WebauthnDemoApplication>(*args)
 }

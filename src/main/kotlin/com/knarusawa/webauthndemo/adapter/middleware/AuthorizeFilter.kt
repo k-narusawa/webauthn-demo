@@ -17,16 +17,16 @@ class AuthorizeFilter : OncePerRequestFilter() {
     private val log = logger()
 
     val matchers = listOf(
-        AntPathRequestMatcher("/api/v1/login"),
-        AntPathRequestMatcher("/api/v1/webauthn/login/request"),
-        AntPathRequestMatcher("/api/v1/webauthn/login")
+            AntPathRequestMatcher("/api/v1/login"),
+            AntPathRequestMatcher("/api/v1/webauthn/login/request"),
+            AntPathRequestMatcher("/api/v1/webauthn/login")
     )
     val combinedMatcher = OrRequestMatcher(matchers)
 
     override fun doFilterInternal(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-        filterChain: FilterChain
+            request: HttpServletRequest,
+            response: HttpServletResponse,
+            filterChain: FilterChain
     ) {
         if (!combinedMatcher.matches(request)) {
             val user = request.session.getAttribute("user") as? LoginUserDetails
@@ -40,7 +40,7 @@ class AuthorizeFilter : OncePerRequestFilter() {
 
             log.info("user_id: ${user.userId}")
             SecurityContextHolder.getContext().authentication =
-                UsernamePasswordAuthenticationToken(user, null, ArrayList())
+                    UsernamePasswordAuthenticationToken(user, null, ArrayList())
         }
 
         filterChain.doFilter(request, response)

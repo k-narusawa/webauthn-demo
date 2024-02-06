@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class UserCredentialsRepositoryImpl(
-    private val userCredentialsDao: UserCredentialsDao
+        private val userCredentialsDao: UserCredentialsDao
 ) : UserCredentialsRepository {
     override fun save(userCredentials: UserCredentials) {
         userCredentialsDao.save(UserCredentialsRecord.from(userCredentials))

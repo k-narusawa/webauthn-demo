@@ -25,9 +25,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebAuthnRegistrationService(
-    private val flowRepository: FlowRepository,
-    private val credentialsRepository: CredentialsRepository,
-    private val userCredentialsRepository: UserCredentialsRepository
+        private val flowRepository: FlowRepository,
+        private val credentialsRepository: CredentialsRepository,
+        private val userCredentialsRepository: UserCredentialsRepository
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -38,21 +38,21 @@ class FinishWebAuthnRegistrationService(
     fun exec(inputData: FinishWebAuthnRegistrationInputData) {
         val origin = Origin.create("http://localhost:3000")
         val flow =
-            flowRepository.findByFlowId(FlowId.from(inputData.flowId))
+                flowRepository.findByFlowId(FlowId.from(inputData.flowId))
 
         val challenge = flow?.let { Base64UrlUtil.decode(it.challenge) }
         val attestationObject = Base64UrlUtil.decode(inputData.attestationObject)
         val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)
 
         val pubKeys = listOf(
-            PublicKeyCredentialParameters(
-                PublicKeyCredentialType.PUBLIC_KEY,
-                COSEAlgorithmIdentifier.ES256
-            ),
-            PublicKeyCredentialParameters(
-                PublicKeyCredentialType.PUBLIC_KEY,
-                COSEAlgorithmIdentifier.RS256
-            ),
+                PublicKeyCredentialParameters(
+                        PublicKeyCredentialType.PUBLIC_KEY,
+                        COSEAlgorithmIdentifier.ES256
+                ),
+                PublicKeyCredentialParameters(
+                        PublicKeyCredentialType.PUBLIC_KEY,
+                        COSEAlgorithmIdentifier.RS256
+                ),
         )
 
         val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
@@ -60,36 +60,36 @@ class FinishWebAuthnRegistrationService(
         val registrationParameters = RegistrationParameters(serverProperty, pubKeys, true)
 
         val registrationData =
-            WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
+                WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
 
         WebAuthnManager.createNonStrictWebAuthnManager()
-            .validate(registrationRequest, registrationParameters)
+                .validate(registrationRequest, registrationParameters)
 
 
         if (
-            registrationData.attestationObject == null ||
-            registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
+                registrationData.attestationObject == null ||
+                registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
         ) {
             throw IllegalStateException("不正なデータ")
         }
 
         val authenticator = AuthenticatorImpl(
-            /* attestedCredentialData = */
-            registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
-            /* attestationStatement =   */
-            registrationData.attestationObject!!.attestationStatement,
-            /* counter =                */
-            registrationData.attestationObject!!.authenticatorData.signCount,
+                /* attestedCredentialData = */
+                registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
+                /* attestationStatement =   */
+                registrationData.attestationObject!!.attestationStatement,
+                /* counter =                */
+                registrationData.attestationObject!!.authenticatorData.signCount,
         )
 
         val credentialId =
-            registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
+                registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
 
         val credentials = Credentials.of(authenticator = authenticator, credentialId = credentialId)
 
         val userCredentials = UserCredentials.of(
-            credentialId = Base64UrlUtil.encodeToString(credentialId),
-            userId = UserId.from(inputData.userId)
+                credentialId = Base64UrlUtil.encodeToString(credentialId),
+                userId = UserId.from(inputData.userId)
         )
 
         credentialsRepository.save(credentials)
