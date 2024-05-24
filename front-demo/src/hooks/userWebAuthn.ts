@@ -7,7 +7,7 @@ export const useWebAuthn = () => {
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
   const router = useRouter();
 
-  const startRegistration = async () => {
+  const getOptions = async () => {
     return await axios(`${apiHost}/api/v1/webauthn/registration/start`, {
       withCredentials: true,
     })
@@ -15,12 +15,11 @@ export const useWebAuthn = () => {
         return response.data;
       })
       .catch((error) => {
-        console.log(error);
         toast.error("Error starting registration");
       });
   };
 
-  const createCredentials = async (options: any) => {
+  const createCredential = async (options: any) => {
     console.log(options);
     options.user.id = bufferDecode(options.user.id);
     options.challenge = bufferDecode(options.challenge);
@@ -36,12 +35,11 @@ export const useWebAuthn = () => {
         return response;
       })
       .catch((error) => {
-        console.log(error);
         toast.error("Error creating");
       });
   };
 
-  const registerCredentials = async (challenge: string, credentials: any) => {
+  const registerCredential = async (challenge: string, credentials: any) => {
     await axios(`${apiHost}/api/v1/webauthn/registration/finish`, {
       method: "POST",
       withCredentials: true,
@@ -68,7 +66,7 @@ export const useWebAuthn = () => {
       });
   };
 
-  const getCredentials = async (options: any) => {
+  const getAuthOptions = async (options: any) => {
     options.challenge = bufferDecode(options.challenge);
     for (let cred of options.allowCredentials) {
       cred.id = bufferDecode(cred.id);
@@ -90,8 +88,7 @@ export const useWebAuthn = () => {
       });
   };
 
-  const postCredentials = async (challenge: string, credentials: any) => {
-    console.log(credentials);
+  const postResults = async (challenge: string, credentials: any) => {
     await axios(`${apiHost}/api/v1/webauthn/login`, {
       method: "POST",
       withCredentials: true,
@@ -121,11 +118,11 @@ export const useWebAuthn = () => {
   };
 
   return {
-    startRegistration,
-    createCredentials,
-    registerCredentials,
-    getCredentials,
-    postCredentials,
+    getOptions,
+    createCredential,
+    registerCredential,
+    getAuthOptions,
+    postResults,
   };
 };
 

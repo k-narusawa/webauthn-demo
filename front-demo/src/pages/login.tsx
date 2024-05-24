@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const LoginPage = () => {
   const router = useRouter();
-  const { getCredentials, postCredentials } = useWebAuthn();
+  const { getAuthOptions, postResults } = useWebAuthn();
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
 
   useEffect(() => {
@@ -71,8 +71,8 @@ const LoginPage = () => {
         console.log(error.response.data);
       });
 
-    const credentials = await getCredentials(options);
-    await postCredentials(options.challenge, credentials);
+    const credentials = await getAuthOptions(options);
+    await postResults(options.challenge, credentials);
   };
 
   return (

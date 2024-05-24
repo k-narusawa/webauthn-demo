@@ -9,7 +9,7 @@ const HomePage = () => {
   const [userinfo, setUserInfo] = useState<any>();
   const [userCredentials, setUserCredentials] = useState<any>();
   const router = useRouter();
-  const { startRegistration, createCredentials, registerCredentials } =
+  const { getOptions, createCredential, registerCredential } =
     useWebAuthn();
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
 
@@ -44,9 +44,9 @@ const HomePage = () => {
   }, [apiHost, router]);
 
   const handleRegistration = async () => {
-    const startResponse = await startRegistration();
-    const credentials = await createCredentials(startResponse);
-    await registerCredentials(startResponse.challenge, credentials);
+    const startResponse = await getOptions();
+    const credentials = await createCredential(startResponse);
+    await registerCredential(startResponse.challenge, credentials);
   };
 
   const handleLogout = async () => {
