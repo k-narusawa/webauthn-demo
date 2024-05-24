@@ -1,7 +1,7 @@
 package com.knarusawa.webauthndemo.adapter.controller.dto
 
 data class WebauthnAuthenticateFinishPostRequest(
-        val flowId: String,
+        val challenge: String,
         val id: String,
         val rawId: String,
         val type: String,

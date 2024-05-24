@@ -20,12 +20,13 @@ class Credentials private constructor(
         private set
 
     companion object {
+        private val objectConverter = ObjectConverter()
+        
         fun of(
                 credentialId: ByteArray?,
                 userId: String,
                 authenticator: AuthenticatorImpl,
         ): Credentials {
-            val objectConverter = ObjectConverter()
             val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
             val attestationStatementEnvelope =
                     AttestationStatementEnvelope(authenticator.attestationStatement!!)

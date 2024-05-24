@@ -8,9 +8,6 @@ import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientInputs
 import com.webauthn4j.util.Base64UrlUtil
 
 data class ApiV1LoginWebauthnRequestGetResponse(
-        @JsonProperty("flowId")
-        val flowId: String,
-
         @JsonProperty("challenge")
         val challenge: String,
 
@@ -30,9 +27,8 @@ data class ApiV1LoginWebauthnRequestGetResponse(
         val extensions: AuthenticationExtensionsClientInputs<AuthenticationExtensionClientInput>?,
 ) {
     companion object {
-        fun from(flowId: String, options: PublicKeyCredentialRequestOptions) =
+        fun from(options: PublicKeyCredentialRequestOptions) =
                 ApiV1LoginWebauthnRequestGetResponse(
-                        flowId = flowId,
                         challenge = Base64UrlUtil.encodeToString(options.challenge.value),
                         timeout = options.timeout ?: 0,
                         rpId = options.rpId!!,

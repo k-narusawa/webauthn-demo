@@ -59,10 +59,8 @@ const LoginPage = () => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const username = formData.get("username") as string;
 
     const options = await axios(`${apiHost}/api/v1/webauthn/login/request`, {
-      params: { username: username },
       withCredentials: true,
     })
       .then(function (response) {
@@ -74,7 +72,7 @@ const LoginPage = () => {
       });
 
     const credentials = await getCredentials(options);
-    await postCredentials(options.flowId, credentials);
+    await postCredentials(options.challenge, credentials);
   };
 
   return (

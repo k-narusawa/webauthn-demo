@@ -43,10 +43,10 @@ const HomePage = () => {
     fetchUserCredentials();
   }, [apiHost, router]);
 
-  const handleRegister = async (attachment: string) => {
-    const startResponse = await startRegistration(attachment);
+  const handleRegistration = async () => {
+    const startResponse = await startRegistration();
     const credentials = await createCredentials(startResponse);
-    await registerCredentials(startResponse.flowId, credentials);
+    await registerCredentials(startResponse.challenge, credentials);
   };
 
   const handleLogout = async () => {
@@ -69,24 +69,15 @@ const HomePage = () => {
       <ToastContainer />
       <label>Username: {userinfo?.username}</label>
       <br />
-      <button
-        onClick={() => {
-          handleRegister("cross-platform");
-        }}
-        type="button"
-        className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
-      >
-        CROSS_PLATFORM Registration
-      </button>
       <br />
       <button
         onClick={() => {
-          handleRegister("platform");
+          handleRegistration();
         }}
         type="button"
         className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
       >
-        PLATFORM Registration
+        Registration
       </button>
       <br />
       <button

@@ -17,9 +17,7 @@ class WebauthnController(
         private val finishWebAuthnRegistrationService: FinishWebAuthnRegistrationService,
 ) {
     @GetMapping("/registration/start")
-    fun webauthnRegistrationStartGet(
-            @RequestParam("authenticatorAttachment") authenticatorAttachment: String
-    ): WebauthnRegistrationStartGetResponse {
+    fun webauthnRegistrationStartGet(): WebauthnRegistrationStartGetResponse {
         val authentication = SecurityContextHolder.getContext().authentication
         val user = authentication.principal as? LoginUserDetails
                 ?: throw IllegalStateException("Principalが不正")
@@ -27,15 +25,10 @@ class WebauthnController(
         val inputData = StartWebAuthnRegistrationInputData(
                 userId = user.userId,
                 username = user.username,
-                authenticatorAttachment = when (authenticatorAttachment) {
-                    "cross-platform" -> StartWebAuthnRegistrationInputData.AuthenticatorAttachment.CROSS_PLATFORM
-                    else -> StartWebAuthnRegistrationInputData.AuthenticatorAttachment.PLATFORM
-                }
         )
         val outputData = startWebAuthnRegistrationService.exec(inputData)
 
         return WebauthnRegistrationStartGetResponse.from(
-                flowId = outputData.flowId,
                 options = outputData.options
         )
     }
@@ -49,7 +42,7 @@ class WebauthnController(
                 ?: throw IllegalStateException("Principalが不正")
 
         val inputData = FinishWebAuthnRegistrationInputData(
-                flowId = body.flowId,
+                challenge = body.challenge,
                 userId = user.userId,
                 username = user.username,
                 id = body.id,

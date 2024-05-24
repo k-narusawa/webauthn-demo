@@ -1,8 +1,7 @@
 package com.knarusawa.webauthndemo.application.startWebAuthnRegistration
 
-import com.knarusawa.webauthndemo.domain.flow.Flow
-import com.knarusawa.webauthndemo.domain.flow.FlowRepository
-import com.knarusawa.webauthndemo.domain.user.UserId
+import com.knarusawa.webauthndemo.domain.challenge.ChallengeData
+import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.webauthn4j.data.*
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
 import com.webauthn4j.data.client.challenge.DefaultChallenge
@@ -14,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class StartWebAuthnRegistrationService(
-        private val flowRepository: FlowRepository
+        private val challengeDataRepository: ChallengeDataRepository
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -24,10 +23,6 @@ class StartWebAuthnRegistrationService(
     fun exec(inputData: StartWebAuthnRegistrationInputData): StartWebAuthnRegistrationOutputData {
         val rpId = PR_ID
         val challenge = DefaultChallenge()
-        val authenticatorAttachment = when (inputData.authenticatorAttachment) {
-            StartWebAuthnRegistrationInputData.AuthenticatorAttachment.CROSS_PLATFORM -> AuthenticatorAttachment.CROSS_PLATFORM
-            StartWebAuthnRegistrationInputData.AuthenticatorAttachment.PLATFORM -> AuthenticatorAttachment.PLATFORM
-        }
 
         val pubKeyCredParams = listOf(
                 PublicKeyCredentialParameters(
@@ -47,8 +42,9 @@ class StartWebAuthnRegistrationService(
         )
 
         val authenticatorSelectionCriteria = AuthenticatorSelectionCriteria(
-                /* authenticatorAttachment = */ authenticatorAttachment,
-                /* requireResidentKey =      */ false,
+                /* authenticatorAttachment = */ null,
+                /* requireResidentKey =      */ true,
+                /* residentKey =             */ ResidentKeyRequirement.REQUIRED,
                 /* userVerification =        */ UserVerificationRequirement.REQUIRED
         )
 
@@ -57,18 +53,17 @@ class StartWebAuthnRegistrationService(
                 /* user =                   */ user,
                 /* challenge =              */ challenge,
                 /* pubKeyCredParams =       */ pubKeyCredParams,
-                /* timeout =                */ TimeUnit.SECONDS.toMillis(6000),
+                /* timeout =                */ TimeUnit.SECONDS.toMillis(180000),
                 /* excludeCredentials =     */ null,
                 /* authenticatorSelection = */ authenticatorSelectionCriteria,
-                /* attestation =            */ AttestationConveyancePreference.NONE,
+                /* attestation =            */ AttestationConveyancePreference.DIRECT,
                 /* extensions =             */ null,
         )
 
-        val flow =
-                Flow.of(userId = UserId.from(inputData.userId), challenge = challenge)
+        val challengeData = ChallengeData.of(challenge = challenge)
 
-        flowRepository.save(flow)
+        challengeDataRepository.save(challengeData)
 
-        return StartWebAuthnRegistrationOutputData(flowId = flow.flowId, options = options)
+        return StartWebAuthnRegistrationOutputData(options = options)
     }
 }

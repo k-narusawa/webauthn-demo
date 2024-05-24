@@ -1,10 +1,8 @@
 package com.knarusawa.webauthndemo.application.finishWebAuthnRegistration
 
+import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.knarusawa.webauthndemo.domain.credentials.Credentials
 import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
-import com.knarusawa.webauthndemo.domain.flow.FlowId
-import com.knarusawa.webauthndemo.domain.flow.FlowRepository
-import com.knarusawa.webauthndemo.domain.user.UserId
 import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
@@ -23,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebAuthnRegistrationService(
-        private val flowRepository: FlowRepository,
+        private val challengeDataRepository: ChallengeDataRepository,
         private val credentialsRepository: CredentialsRepository,
 ) {
     companion object {
@@ -34,10 +32,9 @@ class FinishWebAuthnRegistrationService(
     @Transactional
     fun exec(inputData: FinishWebAuthnRegistrationInputData) {
         val origin = Origin.create("http://localhost:3000")
-        val flow =
-                flowRepository.findByFlowId(FlowId.from(inputData.flowId))
+        val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
 
-        val challenge = flow?.let { Base64UrlUtil.decode(it.challenge) }
+        val challenge = challengeData?.let { Base64UrlUtil.decode(it.challenge) }
         val attestationObject = Base64UrlUtil.decode(inputData.attestationObject)
         val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)
 
@@ -89,6 +86,6 @@ class FinishWebAuthnRegistrationService(
         )
 
         credentialsRepository.save(credentials)
-        flowRepository.deleteByUserId(UserId.from(inputData.userId))
+        challengeDataRepository.deleteByChallenge(Base64UrlUtil.encodeToString(challenge))
     }
 }

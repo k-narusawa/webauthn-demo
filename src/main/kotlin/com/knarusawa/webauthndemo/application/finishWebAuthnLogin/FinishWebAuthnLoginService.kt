@@ -1,8 +1,8 @@
 package com.knarusawa.webauthndemo.application.finishWebAuthnLogin
 
+import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
-import com.knarusawa.webauthndemo.domain.flow.FlowId
-import com.knarusawa.webauthndemo.domain.flow.FlowRepository
+import com.knarusawa.webauthndemo.domain.user.UserId
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebAuthnLoginService(
-        private val flowRepository: FlowRepository,
+        private val challengeDataRepository: ChallengeDataRepository,
         private val credentialsRepository: CredentialsRepository,
 ) {
     companion object {
@@ -31,8 +31,13 @@ class FinishWebAuthnLoginService(
     @Transactional
     fun exec(inputData: FinishWebAuthnLoginInputData): FinishWebAuthnLoginOutputData {
         val origin = Origin.create("http://localhost:3000")
-        val flow = flowRepository.findByFlowId(FlowId.from(inputData.flowId))
+
+        val userId = inputData.userHandle
+                ?: throw RuntimeException("ユーザーの識別に失敗しました")
+
+        val flow = challengeDataRepository.findByChallenge(inputData.challenge)
                 ?: throw IllegalArgumentException("flow is not found")
+
         val challenge = flow.let { Base64UrlUtil.decode(it.challenge) }
 
         val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
@@ -81,6 +86,6 @@ class FinishWebAuthnLoginService(
         credentials.updateCounter(authenticationData.authenticatorData!!.signCount)
         credentialsRepository.save(credentials)
 
-        return FinishWebAuthnLoginOutputData(userId = flow.userId)
+        return FinishWebAuthnLoginOutputData(userId = UserId.from(userId))
     }
 }

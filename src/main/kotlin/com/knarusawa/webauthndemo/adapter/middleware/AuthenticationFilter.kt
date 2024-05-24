@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.knarusawa.webauthndemo.adapter.controller.dto.WebauthnAuthenticateFinishPostRequest
 import com.knarusawa.webauthndemo.application.finishWebAuthnLogin.FinishWebAuthnLoginInputData
 import com.knarusawa.webauthndemo.domain.authenticationToken.WebauthnAssertionAuthenticationToken
-import com.knarusawa.webauthndemo.domain.flow.FlowId
 import com.knarusawa.webauthndemo.util.logger
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -49,11 +48,10 @@ class AuthenticationFilter(
                     WebauthnAuthenticateFinishPostRequest::class.java
             )
 
-            log.info("WebAuthn login challenge id is ${webAuthnRequest.flowId}")
+            log.info("WebAuthn login challenge is ${webAuthnRequest.challenge}")
 
-            val principal = FlowId.from(webAuthnRequest.flowId)
             val credentials = FinishWebAuthnLoginInputData(
-                    flowId = webAuthnRequest.flowId,
+                    challenge = webAuthnRequest.challenge,
                     credentialId = webAuthnRequest.rawId,
                     clientDataJSON = webAuthnRequest.response.clientDataJSON,
                     authenticatorData = webAuthnRequest.response.authenticatorData,
@@ -63,7 +61,7 @@ class AuthenticationFilter(
 
             val authRequest: AbstractAuthenticationToken =
                     WebauthnAssertionAuthenticationToken(
-                            principal = principal,
+                            principal = webAuthnRequest.challenge,
                             credentials = credentials,
                     )
 

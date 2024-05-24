@@ -7,11 +7,8 @@ export const useWebAuthn = () => {
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
   const router = useRouter();
 
-  const startRegistration = async (attachment: string) => {
+  const startRegistration = async () => {
     return await axios(`${apiHost}/api/v1/webauthn/registration/start`, {
-      params: {
-        authenticatorAttachment: attachment,
-      },
       withCredentials: true,
     })
       .then((response) => {
@@ -24,6 +21,7 @@ export const useWebAuthn = () => {
   };
 
   const createCredentials = async (options: any) => {
+    console.log(options);
     options.user.id = bufferDecode(options.user.id);
     options.challenge = bufferDecode(options.challenge);
 
@@ -43,12 +41,12 @@ export const useWebAuthn = () => {
       });
   };
 
-  const registerCredentials = async (flowId: string, credentials: any) => {
+  const registerCredentials = async (challenge: string, credentials: any) => {
     await axios(`${apiHost}/api/v1/webauthn/registration/finish`, {
       method: "POST",
       withCredentials: true,
       data: {
-        flowId: flowId,
+        challenge: base64url.encode(challenge),
         id: credentials.id,
         rawId: base64url.encode(credentials.rawId),
         type: credentials.type,
@@ -76,6 +74,8 @@ export const useWebAuthn = () => {
       cred.id = bufferDecode(cred.id);
     }
 
+    console.log(options);
+
     return await navigator.credentials
       .get({
         publicKey: options,
@@ -90,13 +90,13 @@ export const useWebAuthn = () => {
       });
   };
 
-  const postCredentials = async (flowId: string, credentials: any) => {
+  const postCredentials = async (challenge: string, credentials: any) => {
     console.log(credentials);
     await axios(`${apiHost}/api/v1/webauthn/login`, {
       method: "POST",
       withCredentials: true,
       data: {
-        flowId: flowId,
+        challenge: base64url.encode(challenge),
         id: credentials.id,
         rawId: base64url.encode(credentials.rawId),
         type: credentials.type,
@@ -106,9 +106,7 @@ export const useWebAuthn = () => {
           ),
           clientDataJSON: base64url.encode(credentials.response.clientDataJSON),
           signature: base64url.encode(credentials.response.signature),
-          userHandle: credentials.response.userHandle
-            ? base64url.encode(credentials.response.userHandle)
-            : null,
+          userHandle: base64url.encode(credentials.response.userHandle),
         },
       },
     })

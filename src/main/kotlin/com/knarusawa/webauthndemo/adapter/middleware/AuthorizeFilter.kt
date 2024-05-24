@@ -19,7 +19,8 @@ class AuthorizeFilter : OncePerRequestFilter() {
     val matchers = listOf(
             AntPathRequestMatcher("/api/v1/login"),
             AntPathRequestMatcher("/api/v1/webauthn/login/request"),
-            AntPathRequestMatcher("/api/v1/webauthn/login")
+            AntPathRequestMatcher("/api/v1/webauthn/login"),
+            AntPathRequestMatcher("/h2-console/**"),
     )
     val combinedMatcher = OrRequestMatcher(matchers)
 
@@ -38,7 +39,7 @@ class AuthorizeFilter : OncePerRequestFilter() {
                 return
             }
 
-            log.info("user_id: ${user.userId}")
+            log.debug("Authorized user_id: ${user.userId}")
             SecurityContextHolder.getContext().authentication =
                     UsernamePasswordAuthenticationToken(user, null, ArrayList())
         }
