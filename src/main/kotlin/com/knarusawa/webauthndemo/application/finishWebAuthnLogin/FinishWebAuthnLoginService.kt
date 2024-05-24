@@ -35,10 +35,10 @@ class FinishWebAuthnLoginService(
         val userId = inputData.userHandle
                 ?: throw RuntimeException("ユーザーの識別に失敗しました")
 
-        val flow = challengeDataRepository.findByChallenge(inputData.challenge)
+        val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
                 ?: throw IllegalArgumentException("flow is not found")
 
-        val challenge = flow.let { Base64UrlUtil.decode(it.challenge) }
+        val challenge = challengeData.let { Base64UrlUtil.decode(it.challenge) }
 
         val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
 
@@ -63,7 +63,7 @@ class FinishWebAuthnLoginService(
 
         val authenticationRequest = AuthenticationRequest(
                 /* credentialId = */      Base64UrlUtil.decode(inputData.credentialId),
-                /* userHandle = */        inputData.userHandle?.let { Base64UrlUtil.decode(it) },
+                /* userHandle = */        inputData.userHandle.let { Base64UrlUtil.decode(it) },
                 /* authenticatorData = */ Base64UrlUtil.decode(inputData.authenticatorData),
                 /* clientDataJSON = */    Base64UrlUtil.decode(inputData.clientDataJSON),
                 /* signature = */         Base64UrlUtil.decode(inputData.signature),
