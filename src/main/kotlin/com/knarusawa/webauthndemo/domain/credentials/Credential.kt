@@ -6,7 +6,7 @@ import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.util.Base64UrlUtil
 
-class Credentials private constructor(
+class Credential private constructor(
         val credentialId: String,
         val userId: String,
         val serializedAttestedCredentialData: String,
@@ -21,12 +21,12 @@ class Credentials private constructor(
 
     companion object {
         private val objectConverter = ObjectConverter()
-        
+
         fun of(
                 credentialId: ByteArray?,
                 userId: String,
                 authenticator: AuthenticatorImpl,
-        ): Credentials {
+        ): Credential {
             val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
             val attestationStatementEnvelope =
                     AttestationStatementEnvelope(authenticator.attestationStatement!!)
@@ -36,7 +36,7 @@ class Credentials private constructor(
             val serializedAttestedCredentialData =
                     attestedCredentialDataConverter.convert(authenticator.attestedCredentialData)
 
-            return Credentials(
+            return Credential(
                     credentialId = Base64UrlUtil.encodeToString(credentialId),
                     userId = userId,
                     serializedAttestedCredentialData = Base64UrlUtil.encodeToString(
@@ -64,7 +64,7 @@ class Credentials private constructor(
             )
         }
 
-        fun from(record: CredentialsRecord) = Credentials(
+        fun from(record: CredentialsRecord) = Credential(
                 credentialId = record.credentialId,
                 userId = record.userId,
                 serializedAttestedCredentialData = record.serializedAttestedCredentialData,

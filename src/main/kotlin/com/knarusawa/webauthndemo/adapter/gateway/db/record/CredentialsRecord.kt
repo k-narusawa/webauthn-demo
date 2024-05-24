@@ -1,6 +1,6 @@
 package com.knarusawa.webauthndemo.adapter.gateway.db.record
 
-import com.knarusawa.webauthndemo.domain.credentials.Credentials
+import com.knarusawa.webauthndemo.domain.credentials.Credential
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -35,15 +35,15 @@ data class CredentialsRecord(
         val counter: Long,
 ) {
     companion object {
-        fun from(credentials: Credentials) = CredentialsRecord(
-                credentialId = credentials.credentialId,
-                userId = credentials.userId,
-                serializedAttestedCredentialData = credentials.serializedAttestedCredentialData,
-                serializedEnvelope = credentials.serializedEnvelope,
-                serializedTransports = credentials.serializedTransports,
-                serializedAuthenticatorExtensions = credentials.serializedAuthenticatorExtensions,
-                serializedClientExtensions = credentials.serializedClientExtensions,
-                counter = credentials.counter,
+        fun from(credential: Credential) = CredentialsRecord(
+                credentialId = credential.credentialId,
+                userId = credential.userId,
+                serializedAttestedCredentialData = credential.serializedAttestedCredentialData,
+                serializedEnvelope = credential.serializedEnvelope,
+                serializedTransports = credential.serializedTransports,
+                serializedAuthenticatorExtensions = credential.serializedAuthenticatorExtensions,
+                serializedClientExtensions = credential.serializedClientExtensions,
+                counter = credential.counter,
         )
     }
 }

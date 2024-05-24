@@ -1,7 +1,7 @@
 package com.knarusawa.webauthndemo.application.finishWebAuthnLogin
 
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
-import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
+import com.knarusawa.webauthndemo.domain.credentials.CredentialRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class FinishWebAuthnLoginService(
         private val challengeDataRepository: ChallengeDataRepository,
-        private val credentialsRepository: CredentialsRepository,
+        private val credentialRepository: CredentialRepository,
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -42,7 +42,7 @@ class FinishWebAuthnLoginService(
 
         val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
 
-        val credentials = credentialsRepository.findByCredentialId(inputData.credentialId)
+        val credentials = credentialRepository.findByCredentialId(inputData.credentialId)
                 ?: throw IllegalArgumentException("credential is not found")
 
         val authenticator = AuthenticatorImpl(
@@ -84,7 +84,7 @@ class FinishWebAuthnLoginService(
         }
 
         credentials.updateCounter(authenticationData.authenticatorData!!.signCount)
-        credentialsRepository.save(credentials)
+        credentialRepository.save(credentials)
 
         return FinishWebAuthnLoginOutputData(userId = UserId.from(userId))
     }

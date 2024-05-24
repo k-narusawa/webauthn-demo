@@ -1,8 +1,8 @@
 package com.knarusawa.webauthndemo.application.finishWebAuthnRegistration
 
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
-import com.knarusawa.webauthndemo.domain.credentials.Credentials
-import com.knarusawa.webauthndemo.domain.credentials.CredentialsRepository
+import com.knarusawa.webauthndemo.domain.credentials.Credential
+import com.knarusawa.webauthndemo.domain.credentials.CredentialRepository
 import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class FinishWebAuthnRegistrationService(
         private val challengeDataRepository: ChallengeDataRepository,
-        private val credentialsRepository: CredentialsRepository,
+        private val credentialRepository: CredentialRepository,
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -79,13 +79,13 @@ class FinishWebAuthnRegistrationService(
         val credentialId =
                 registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
 
-        val credentials = Credentials.of(
+        val credential = Credential.of(
                 credentialId = credentialId,
                 userId = inputData.userId,
                 authenticator = authenticator,
         )
 
-        credentialsRepository.save(credentials)
+        credentialRepository.save(credential)
         challengeDataRepository.deleteByChallenge(Base64UrlUtil.encodeToString(challenge))
     }
 }
