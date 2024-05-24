@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/webauthn/login")
 class WebAuthnLoginController(
-        private val startWebauthnLoginService: StartWebAuthnLoginService
+    private val startWebauthnLoginService: StartWebAuthnLoginService
 ) {
     @GetMapping("/request")
     fun apiV1LoginWebauthnRequestGet(): ApiV1LoginWebauthnRequestGetResponse {
         val outputData = startWebauthnLoginService.exec()
 
         return ApiV1LoginWebauthnRequestGetResponse.from(
-                options = outputData.options
+            options = outputData.options
         )
     }
 }

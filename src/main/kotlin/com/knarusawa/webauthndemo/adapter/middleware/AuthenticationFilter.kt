@@ -20,7 +20,7 @@ import org.springframework.security.web.context.SecurityContextRepository
 
 
 class AuthenticationFilter(
-        private val authenticationManager: AuthenticationManager
+    private val authenticationManager: AuthenticationManager
 ) : UsernamePasswordAuthenticationFilter() {
     companion object {
         private val log = logger()
@@ -30,40 +30,40 @@ class AuthenticationFilter(
 
     init {
         this.customSecurityContextRepository = DelegatingSecurityContextRepository(
-                RequestAttributeSecurityContextRepository(),
-                HttpSessionSecurityContextRepository()
+            RequestAttributeSecurityContextRepository(),
+            HttpSessionSecurityContextRepository()
         )
         super.setSecurityContextRepository(customSecurityContextRepository)
     }
 
     override fun attemptAuthentication(
-            request: HttpServletRequest, response: HttpServletResponse
+        request: HttpServletRequest, response: HttpServletResponse
     ): Authentication {
         log.info("METHOD: [${request.method}], URL: [${request.requestURI}]")
         saveContext(request, response)
 
         if (request.requestURI == "/api/v1/webauthn/login") {
             val webAuthnRequest = jacksonObjectMapper().readValue(
-                    request.inputStream,
-                    WebauthnAuthenticateFinishPostRequest::class.java
+                request.inputStream,
+                WebauthnAuthenticateFinishPostRequest::class.java
             )
 
             log.info("WebAuthn login challenge is ${webAuthnRequest.challenge}")
 
             val credentials = FinishWebAuthnLoginInputData(
-                    challenge = webAuthnRequest.challenge,
-                    credentialId = webAuthnRequest.rawId,
-                    clientDataJSON = webAuthnRequest.response.clientDataJSON,
-                    authenticatorData = webAuthnRequest.response.authenticatorData,
-                    signature = webAuthnRequest.response.signature,
-                    userHandle = webAuthnRequest.response.userHandle
+                challenge = webAuthnRequest.challenge,
+                credentialId = webAuthnRequest.rawId,
+                clientDataJSON = webAuthnRequest.response.clientDataJSON,
+                authenticatorData = webAuthnRequest.response.authenticatorData,
+                signature = webAuthnRequest.response.signature,
+                userHandle = webAuthnRequest.response.userHandle
             )
 
             val authRequest: AbstractAuthenticationToken =
-                    WebauthnAssertionAuthenticationToken(
-                            principal = webAuthnRequest.challenge,
-                            credentials = credentials,
-                    )
+                WebauthnAssertionAuthenticationToken(
+                    principal = webAuthnRequest.challenge,
+                    credentials = credentials,
+                )
 
 //            setDetails(request, authRequest)
 

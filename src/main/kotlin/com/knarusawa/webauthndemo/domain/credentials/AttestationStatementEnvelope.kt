@@ -8,13 +8,13 @@ import java.io.Serializable
 
 
 internal class AttestationStatementEnvelope @JsonCreator constructor(
-        @field:JsonTypeInfo(
-                use = JsonTypeInfo.Id.NAME,
-                include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
-                property = "fmt"
-        ) @field:JsonProperty("attStmt") @param:JsonProperty(
-                "attStmt"
-        ) val attestationStatement: AttestationStatement
+    @field:JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
+        property = "fmt"
+    ) @field:JsonProperty("attStmt") @param:JsonProperty(
+        "attStmt"
+    ) val attestationStatement: AttestationStatement
 ) : Serializable {
 
     @get:JsonProperty("fmt")

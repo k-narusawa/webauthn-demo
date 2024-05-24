@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class StartWebAuthnRegistrationService(
-        private val challengeDataRepository: ChallengeDataRepository
+    private val challengeDataRepository: ChallengeDataRepository
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -25,39 +25,39 @@ class StartWebAuthnRegistrationService(
         val challenge = DefaultChallenge()
 
         val pubKeyCredParams = listOf(
-                PublicKeyCredentialParameters(
-                        PublicKeyCredentialType.PUBLIC_KEY,
-                        COSEAlgorithmIdentifier.ES256
-                ),
-                PublicKeyCredentialParameters(
-                        PublicKeyCredentialType.PUBLIC_KEY,
-                        COSEAlgorithmIdentifier.RS256
-                ),
+            PublicKeyCredentialParameters(
+                PublicKeyCredentialType.PUBLIC_KEY,
+                COSEAlgorithmIdentifier.ES256
+            ),
+            PublicKeyCredentialParameters(
+                PublicKeyCredentialType.PUBLIC_KEY,
+                COSEAlgorithmIdentifier.RS256
+            ),
         )
 
         val user = PublicKeyCredentialUserEntity(
-                /* id = */          Base64UrlUtil.decode(inputData.userId),
-                /* name = */        inputData.username,
-                /* displayName = */ inputData.username,
+            /* id = */          Base64UrlUtil.decode(inputData.userId),
+            /* name = */        inputData.username,
+            /* displayName = */ inputData.username,
         )
 
         val authenticatorSelectionCriteria = AuthenticatorSelectionCriteria(
-                /* authenticatorAttachment = */ null,
-                /* requireResidentKey =      */ true,
-                /* residentKey =             */ ResidentKeyRequirement.REQUIRED,
-                /* userVerification =        */ UserVerificationRequirement.REQUIRED
+            /* authenticatorAttachment = */ null,
+            /* requireResidentKey =      */ true,
+            /* residentKey =             */ ResidentKeyRequirement.REQUIRED,
+            /* userVerification =        */ UserVerificationRequirement.REQUIRED
         )
 
         val options = PublicKeyCredentialCreationOptions(
-                /* rp =                     */ PublicKeyCredentialRpEntity(rpId, "webauthn-demo"),
-                /* user =                   */ user,
-                /* challenge =              */ challenge,
-                /* pubKeyCredParams =       */ pubKeyCredParams,
-                /* timeout =                */ TimeUnit.SECONDS.toMillis(180000),
-                /* excludeCredentials =     */ null,
-                /* authenticatorSelection = */ authenticatorSelectionCriteria,
-                /* attestation =            */ AttestationConveyancePreference.DIRECT,
-                /* extensions =             */ null,
+            /* rp =                     */ PublicKeyCredentialRpEntity(rpId, "webauthn-demo"),
+            /* user =                   */ user,
+            /* challenge =              */ challenge,
+            /* pubKeyCredParams =       */ pubKeyCredParams,
+            /* timeout =                */ TimeUnit.SECONDS.toMillis(180000),
+            /* excludeCredentials =     */ null,
+            /* authenticatorSelection = */ authenticatorSelectionCriteria,
+            /* attestation =            */ AttestationConveyancePreference.DIRECT,
+            /* extensions =             */ null,
         )
 
         val challengeData = ChallengeData.of(challenge = challenge)

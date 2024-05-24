@@ -14,10 +14,10 @@ class UserinfoController {
     fun apiV1UserinfoGet(): UserinfoGetResponse {
         val authentication = SecurityContextHolder.getContext().authentication
         val user = authentication.principal as? LoginUserDetails
-                ?: throw IllegalStateException("Principalが不正")
+            ?: throw IllegalStateException("Principalが不正")
 
         return UserinfoGetResponse(
-                username = user.username
+            username = user.username
         )
     }
 }

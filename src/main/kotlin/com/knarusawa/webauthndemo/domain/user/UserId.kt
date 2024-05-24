@@ -3,7 +3,7 @@ package com.knarusawa.webauthndemo.domain.user
 import java.util.*
 
 data class UserId private constructor(
-        private val value: UUID
+    private val value: UUID
 ) {
     companion object {
         fun of() = UserId(value = UUID.randomUUID())

@@ -13,43 +13,43 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/v1/webauthn")
 class WebauthnController(
-        private val startWebAuthnRegistrationService: StartWebAuthnRegistrationService,
-        private val finishWebAuthnRegistrationService: FinishWebAuthnRegistrationService,
+    private val startWebAuthnRegistrationService: StartWebAuthnRegistrationService,
+    private val finishWebAuthnRegistrationService: FinishWebAuthnRegistrationService,
 ) {
     @GetMapping("/registration/start")
     fun webauthnRegistrationStartGet(): WebauthnRegistrationStartGetResponse {
         val authentication = SecurityContextHolder.getContext().authentication
         val user = authentication.principal as? LoginUserDetails
-                ?: throw IllegalStateException("Principalが不正")
+            ?: throw IllegalStateException("Principalが不正")
 
         val inputData = StartWebAuthnRegistrationInputData(
-                userId = user.userId,
-                username = user.username,
+            userId = user.userId,
+            username = user.username,
         )
         val outputData = startWebAuthnRegistrationService.exec(inputData)
 
         return WebauthnRegistrationStartGetResponse.from(
-                options = outputData.options
+            options = outputData.options
         )
     }
 
     @PostMapping("/registration/finish")
     fun webauthnRegistrationFinishPost(
-            @RequestBody body: WebauthnRegistrationFinishPostRequest
+        @RequestBody body: WebauthnRegistrationFinishPostRequest
     ) {
         val authentication = SecurityContextHolder.getContext().authentication
         val user = authentication.principal as? LoginUserDetails
-                ?: throw IllegalStateException("Principalが不正")
+            ?: throw IllegalStateException("Principalが不正")
 
         val inputData = FinishWebAuthnRegistrationInputData(
-                challenge = body.challenge,
-                userId = user.userId,
-                username = user.username,
-                id = body.id,
-                rawId = body.rawId,
-                type = body.type,
-                attestationObject = body.response.attestationObject,
-                clientDataJSON = body.response.clientDataJSON,
+            challenge = body.challenge,
+            userId = user.userId,
+            username = user.username,
+            id = body.id,
+            rawId = body.rawId,
+            type = body.type,
+            attestationObject = body.response.attestationObject,
+            clientDataJSON = body.response.clientDataJSON,
         )
         finishWebAuthnRegistrationService.exec(inputData)
     }

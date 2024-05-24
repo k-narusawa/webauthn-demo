@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class CredentialRepositoryImpl(
-        private val credentialsDao: CredentialsDao
+    private val credentialsDao: CredentialsDao
 ) : CredentialRepository {
     override fun save(credential: Credential) {
         credentialsDao.save(CredentialsRecord.from(credential))

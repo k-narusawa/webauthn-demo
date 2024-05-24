@@ -17,52 +17,52 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(WebAuthnVerificationFailedException::class)
     fun handleWebAuthnVerificationFailedException(
-            ex: WebAuthnVerificationFailedException,
-            request: HttpServletRequest
+        ex: WebAuthnVerificationFailedException,
+        request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
         log.error("message: ${ex.message}, cause: ${ex.cause}, ex: $ex")
         log.warn(ex.stackTraceToString())
         return ResponseEntity(
-                ErrorResponse.of(
-                        exception = ex,
-                        errorMessage = ex.message,
-                        logLevel = LogLevel.ERROR
-                ),
-                HttpStatus.UNAUTHORIZED
+            ErrorResponse.of(
+                exception = ex,
+                errorMessage = ex.message,
+                logLevel = LogLevel.ERROR
+            ),
+            HttpStatus.UNAUTHORIZED
         )
     }
 
     @ExceptionHandler(ValidationException::class)
     fun handleValidationException(
-            ex: ValidationException,
-            request: HttpServletRequest
+        ex: ValidationException,
+        request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
         log.error("message: ${ex.message}, cause: ${ex.cause}, ex: $ex")
         log.warn(ex.stackTraceToString())
         return ResponseEntity(
-                ErrorResponse.of(
-                        exception = ex,
-                        errorMessage = ex.message ?: "予期せぬエラーが発生しました",
-                        logLevel = LogLevel.ERROR
-                ),
-                HttpStatus.UNAUTHORIZED
+            ErrorResponse.of(
+                exception = ex,
+                errorMessage = ex.message ?: "予期せぬエラーが発生しました",
+                logLevel = LogLevel.ERROR
+            ),
+            HttpStatus.UNAUTHORIZED
         )
     }
 
     @ExceptionHandler(Exception::class)
     fun handleException(
-            ex: Exception,
-            request: HttpServletRequest
+        ex: Exception,
+        request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
         log.error("message: ${ex.message}, cause: ${ex.cause}, ex: $ex")
         log.warn(ex.stackTraceToString())
         return ResponseEntity(
-                ErrorResponse.of(
-                        exception = ex,
-                        errorMessage = ex.message ?: "予期せぬエラーが発生しました",
-                        logLevel = LogLevel.ERROR
-                ),
-                HttpStatus.INTERNAL_SERVER_ERROR
+            ErrorResponse.of(
+                exception = ex,
+                errorMessage = ex.message ?: "予期せぬエラーが発生しました",
+                logLevel = LogLevel.ERROR
+            ),
+            HttpStatus.INTERNAL_SERVER_ERROR
         )
     }
 }

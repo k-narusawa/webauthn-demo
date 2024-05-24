@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class StartWebAuthnLoginService(
-        private val challengeDataRepository: ChallengeDataRepository,
+    private val challengeDataRepository: ChallengeDataRepository,
 ) {
     companion object {
         private val RP = PublicKeyCredentialRpEntity("localhost", "localhost")
@@ -26,18 +26,18 @@ class StartWebAuthnLoginService(
         val challengeData = ChallengeData.of(challenge = challenge)
 
         val options = PublicKeyCredentialRequestOptions(
-                challenge,
-                60000,
-                RP.id,
-                listOf<PublicKeyCredentialDescriptor>(),
-                UserVerificationRequirement.REQUIRED,
-                null
+            challenge,
+            60000,
+            RP.id,
+            listOf<PublicKeyCredentialDescriptor>(),
+            UserVerificationRequirement.REQUIRED,
+            null
         )
         challengeDataRepository.save(challengeData)
 
         return StartWebAuthnLoginOutputData(
-                challenge = challengeData.challenge,
-                options = options
+            challenge = challengeData.challenge,
+            options = options
         )
     }
 }

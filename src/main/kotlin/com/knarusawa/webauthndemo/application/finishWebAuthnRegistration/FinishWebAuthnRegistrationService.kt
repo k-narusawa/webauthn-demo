@@ -21,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebAuthnRegistrationService(
-        private val challengeDataRepository: ChallengeDataRepository,
-        private val credentialRepository: CredentialRepository,
+    private val challengeDataRepository: ChallengeDataRepository,
+    private val credentialRepository: CredentialRepository,
 ) {
     companion object {
         private const val PR_ID = "localhost"
@@ -39,14 +39,14 @@ class FinishWebAuthnRegistrationService(
         val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)
 
         val pubKeys = listOf(
-                PublicKeyCredentialParameters(
-                        PublicKeyCredentialType.PUBLIC_KEY,
-                        COSEAlgorithmIdentifier.ES256
-                ),
-                PublicKeyCredentialParameters(
-                        PublicKeyCredentialType.PUBLIC_KEY,
-                        COSEAlgorithmIdentifier.RS256
-                ),
+            PublicKeyCredentialParameters(
+                PublicKeyCredentialType.PUBLIC_KEY,
+                COSEAlgorithmIdentifier.ES256
+            ),
+            PublicKeyCredentialParameters(
+                PublicKeyCredentialType.PUBLIC_KEY,
+                COSEAlgorithmIdentifier.RS256
+            ),
         )
 
         val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
@@ -54,35 +54,35 @@ class FinishWebAuthnRegistrationService(
         val registrationParameters = RegistrationParameters(serverProperty, pubKeys, true)
 
         val registrationData =
-                WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
+            WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
 
         WebAuthnManager.createNonStrictWebAuthnManager()
-                .validate(registrationRequest, registrationParameters)
+            .validate(registrationRequest, registrationParameters)
 
 
         if (
-                registrationData.attestationObject == null ||
-                registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
+            registrationData.attestationObject == null ||
+            registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
         ) {
             throw IllegalStateException("不正なデータ")
         }
 
         val authenticator = AuthenticatorImpl(
-                /* attestedCredentialData = */
-                registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
-                /* attestationStatement =   */
-                registrationData.attestationObject!!.attestationStatement,
-                /* counter =                */
-                registrationData.attestationObject!!.authenticatorData.signCount,
+            /* attestedCredentialData = */
+            registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
+            /* attestationStatement =   */
+            registrationData.attestationObject!!.attestationStatement,
+            /* counter =                */
+            registrationData.attestationObject!!.authenticatorData.signCount,
         )
 
         val credentialId =
-                registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
+            registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
 
         val credential = Credential.of(
-                credentialId = credentialId,
-                userId = inputData.userId,
-                authenticator = authenticator,
+            credentialId = credentialId,
+            userId = inputData.userId,
+            authenticator = authenticator,
         )
 
         credentialRepository.save(credential)

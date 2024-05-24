@@ -10,18 +10,18 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class UserRepositoryImpl(
-        private val userDao: UserDao
+    private val userDao: UserDao
 ) : UserRepository {
     override fun save(user: User) {
         userDao.save(
-                UserRecord(
-                        userId = user.userId.value(),
-                        username = user.username.value(),
-                        password = user.password.value(),
-                        isAccountLock = user.isAccountLock,
-                        failedAttempts = user.failedAttempts,
-                        isDisabled = user.isDisabled,
-                )
+            UserRecord(
+                userId = user.userId.value(),
+                username = user.username.value(),
+                password = user.password.value(),
+                isAccountLock = user.isAccountLock,
+                failedAttempts = user.failedAttempts,
+                isDisabled = user.isDisabled,
+            )
         )
     }
 
