@@ -16,20 +16,26 @@ data class CredentialsRecord(
   @Column(name = "user_id")
   val userId: String,
 
-  @Column(name = "serialized_attested_credential_data")
-  val serializedAttestedCredentialData: String,
+  @Column(name = "aaguid")
+  val aaguid: String,
 
-  @Column(name = "serialized_envelope")
-  val serializedEnvelope: String,
+  @Column(name = "label")
+  val label: String,
 
-  @Column(name = "serialized_transports")
-  val serializedTransports: String,
+  @Column(name = "attested_credential_data")
+  val attestedCredentialData: String,
 
-  @Column(name = "serialized_authenticator_extensions")
-  val serializedAuthenticatorExtensions: String,
+  @Column(name = "attestation_statement_format")
+  val attestationStatementFormat: String,
 
-  @Column(name = "serialized_client_extensions")
-  val serializedClientExtensions: String,
+  @Column(name = "transports")
+  val transports: String,
+
+  @Column(name = "authenticator_extensions")
+  val authenticatorExtensions: String,
+
+  @Column(name = "client_extensions")
+  val clientExtensions: String,
 
   @Column(name = "counter")
   val counter: Long,
@@ -38,11 +44,13 @@ data class CredentialsRecord(
     fun from(credential: Credential) = CredentialsRecord(
       credentialId = credential.credentialId,
       userId = credential.userId,
-      serializedAttestedCredentialData = credential.serializedAttestedCredentialData,
-      serializedEnvelope = credential.serializedEnvelope,
-      serializedTransports = credential.serializedTransports,
-      serializedAuthenticatorExtensions = credential.serializedAuthenticatorExtensions,
-      serializedClientExtensions = credential.serializedClientExtensions,
+      aaguid = credential.aaguid,
+      label = credential.label,
+      attestedCredentialData = credential.attestedCredentialData,
+      attestationStatementFormat = credential.attestationStatementFormat,
+      transports = credential.transports,
+      authenticatorExtensions = credential.authenticatorExtensions,
+      clientExtensions = credential.clientExtensions,
       counter = credential.counter,
     )
   }

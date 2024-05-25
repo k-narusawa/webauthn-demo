@@ -4,6 +4,7 @@ import com.knarusawa.webauthndemo.config.WebAuthnConfig
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.knarusawa.webauthndemo.domain.credentials.CredentialRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
+import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
@@ -26,6 +27,7 @@ class FinishWebAuthnAuthenticationService(
   private val credentialRepository: CredentialRepository,
 ) {
   companion object {
+    private val log = logger()
     private val attestedCredentialDataConverter =
       AttestedCredentialDataConverter(ObjectConverter())
   }
@@ -45,8 +47,10 @@ class FinishWebAuthnAuthenticationService(
     val credentials = credentialRepository.findByCredentialId(inputData.credentialId)
       ?: throw IllegalArgumentException("credential is not found")
 
+    log.info(credentials.toString())
+
     val attestedCredentialData = attestedCredentialDataConverter.convert(
-      Base64UrlUtil.decode(credentials.serializedAttestedCredentialData)
+      Base64UrlUtil.decode(credentials.attestedCredentialData)
     )
 
     val authenticator = AuthenticatorImpl(

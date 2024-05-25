@@ -1,6 +1,7 @@
 package com.knarusawa.webauthndemo.domain.credentials
 
 import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
+import com.knarusawa.webauthndemo.domain.aaguid.AAGUID
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.util.ObjectConverter
@@ -9,13 +10,17 @@ import com.webauthn4j.util.Base64UrlUtil
 class Credential private constructor(
   val credentialId: String,
   val userId: String,
-  val serializedAttestedCredentialData: String,
-  val serializedEnvelope: String,
-  val serializedTransports: String,
-  val serializedAuthenticatorExtensions: String,
-  val serializedClientExtensions: String,
+  val aaguid: String,
+  label: String,
+  val attestedCredentialData: String,
+  val attestationStatementFormat: String,
+  val transports: String,
+  val authenticatorExtensions: String,
+  val clientExtensions: String,
   counter: Long,
 ) {
+  var label: String = label
+    private set
   var counter: Long = counter
     private set
 
@@ -28,37 +33,33 @@ class Credential private constructor(
       authenticator: AuthenticatorImpl,
     ): Credential {
       val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
-      val attestationStatementEnvelope =
-        AttestationStatementEnvelope(authenticator.attestationStatement!!)
-      val serializedEnvelope =
-        objectConverter.cborConverter.writeValueAsBytes(attestationStatementEnvelope);
 
       val serializedAttestedCredentialData =
         attestedCredentialDataConverter.convert(authenticator.attestedCredentialData)
 
+      val aaguid = authenticator.attestedCredentialData.aaguid.value.toString()
+
+      val label = AAGUID.fromAAGUID(aaguid)?.labael ?: "Unknown AAGUID"
+
       return Credential(
         credentialId = Base64UrlUtil.encodeToString(credentialId),
         userId = userId,
-        serializedAttestedCredentialData = Base64UrlUtil.encodeToString(
-          serializedAttestedCredentialData
-        ),
-        serializedEnvelope = Base64UrlUtil.encodeToString(serializedEnvelope),
-        serializedTransports = Base64UrlUtil.encodeToString(
-          objectConverter.cborConverter.writeValueAsBytes(
-            objectConverter.cborConverter.writeValueAsBytes(
-              authenticator.transports
-            )
+        aaguid = authenticator.attestedCredentialData.aaguid.value.toString(),
+        label = label,
+        attestedCredentialData = Base64UrlUtil.encodeToString(serializedAttestedCredentialData),
+        attestationStatementFormat = authenticator.attestationStatement!!.format,
+        transports = authenticator.transports?.let {
+          objectConverter.jsonConverter.writeValueAsString(
+            it
           )
-        ),
-        serializedAuthenticatorExtensions = Base64UrlUtil.encodeToString(
+        } ?: "[]",
+        authenticatorExtensions = Base64UrlUtil.encodeToString(
           objectConverter.cborConverter.writeValueAsBytes(
             authenticator.authenticatorExtensions
           )
         ),
-        serializedClientExtensions = Base64UrlUtil.encodeToString(
-          objectConverter.cborConverter.writeValueAsBytes(
-            authenticator.clientExtensions
-          )
+        clientExtensions = objectConverter.jsonConverter.writeValueAsString(
+          authenticator.clientExtensions
         ),
         counter = authenticator.counter,
       )
@@ -67,16 +68,39 @@ class Credential private constructor(
     fun from(record: CredentialsRecord) = Credential(
       credentialId = record.credentialId,
       userId = record.userId,
-      serializedAttestedCredentialData = record.serializedAttestedCredentialData,
-      serializedEnvelope = record.serializedEnvelope,
-      serializedTransports = record.serializedTransports,
-      serializedAuthenticatorExtensions = record.serializedAuthenticatorExtensions,
-      serializedClientExtensions = record.serializedClientExtensions,
+      aaguid = record.aaguid,
+      label = record.label,
+      attestedCredentialData = record.attestedCredentialData,
+      attestationStatementFormat = record.attestationStatementFormat,
+      transports = record.transports,
+      authenticatorExtensions = record.authenticatorExtensions,
+      clientExtensions = record.clientExtensions,
       counter = record.counter,
     )
   }
 
+  fun changeLabel(label: String) {
+    this.label = label
+  }
+
   fun updateCounter(counter: Long) {
     this.counter = counter
+  }
+
+  override fun toString(): String {
+    return """
+      Credential(
+      credentialId='$credentialId', 
+      userId='$userId', 
+      aaguid='$aaguid',
+      label='$label',
+      attestedCredentialData='$attestedCredentialData',
+      attestationStatementFormat='$attestationStatementFormat',
+      transports=$transports, 
+      authenticatorExtensions='$authenticatorExtensions', 
+      clientExtensions='$clientExtensions', 
+      counter=$counter
+    )
+    """.trimIndent()
   }
 }

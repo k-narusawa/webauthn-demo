@@ -24,7 +24,7 @@ const LoginPage = () => {
         });
     };
     fetchUserInfo();
-  }, [apiHost, router]);
+  }, []);
 
   const handleLogin: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();

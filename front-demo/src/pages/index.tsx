@@ -10,13 +10,15 @@ import { PasskeyCard } from "@/components/pages/top/PasskeyCard";
 
 const HomePage = () => {
   const [userinfo, setUserInfo] = useState<any>();
-  const [userCredentials, setUserCredentials] = useState<any>();
+  const [keys, setKeys] = useState<PasskeyResponse|null>(null);
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const router = useRouter();
   const { getOptions, createCredential, registerCredential } =
     useWebAuthn();
   const apiHost = process.env.NEXT_PUBLIC_API_HOST;
 
   useEffect(() => {
+    setIsRegistered(false);
     const fetchUserInfo = async () => {
       await axios(`${apiHost}/v1/userinfo`, {
         withCredentials: true,
@@ -25,17 +27,18 @@ const HomePage = () => {
           setUserInfo(response.data);
         })
         .catch((error) => {
-          console.log(error.response.data);
+          console.log(error.response.data); 
           router.push("/login");
         });
     };
+
     const fetchUserCredentials = async () => {
-      await axios(`${apiHost}/v1/users/credentials`, {
+      await axios(`${apiHost}/v1/users/webauthn/keys`, {
         withCredentials: true,
       })
         .then((response) => {
           console.log(response.data);
-          setUserCredentials(response.data);
+          setKeys(response.data);
         })
         .catch((error) => {
           console.log(error.response.data);
@@ -44,12 +47,13 @@ const HomePage = () => {
 
     fetchUserInfo();
     fetchUserCredentials();
-  }, [apiHost, router]);
+  }, [apiHost, router, isRegistered]);
 
   const handleRegistration = async () => {
     const startResponse = await getOptions();
     const credentials = await createCredential(startResponse);
     await registerCredential(startResponse.challenge, credentials);
+    setIsRegistered(true);
   };
 
   const handleLogout = async () => {
@@ -74,7 +78,7 @@ const HomePage = () => {
 
         <div className="pt-10"/>
 
-        <PasskeyCard passkeys={null} onRegister={handleRegistration} onDelete={() => {}} />
+        <PasskeyCard passkeys={keys} onRegister={handleRegistration} onDelete={() => {}} />
       
         <div className="pt-10"/>
 

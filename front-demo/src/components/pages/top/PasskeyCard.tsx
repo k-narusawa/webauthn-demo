@@ -24,7 +24,7 @@ export const PasskeyCard: React.FC<Props> = ({
             <HorizontalLine />
             <div className="grid grid-cols-6 py-4 px-8">
               <div className="col-start-1 col-span-3">
-                <span className="text-gray-500">{passkey.key_name}</span>
+                <span className="text-gray-500">{passkey.label}</span>
               </div>
               <div className="col-start-6">
                 <span

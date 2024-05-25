@@ -6,5 +6,5 @@ type PasskeyResponseItem = {
   credential_id: number;
   id: string;
   aaguid: string;
-  key_name: string;
+  label: string;
 };

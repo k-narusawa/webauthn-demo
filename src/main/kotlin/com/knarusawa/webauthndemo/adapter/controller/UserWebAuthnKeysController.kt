@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/v1/users/credentials")
-class UserCredentialsController(
+@RequestMapping("/v1/users/webauthn/keys")
+class UserWebAuthnKeysController(
   private val credentialsDtoQueryService: CredentialsDtoQueryService
 ) {
   @GetMapping
-  fun apiV1UsersCredentialsGet(): ApiV1UsersCredentialsGet {
+  fun v1UsersWebAuthnKeys(): ApiV1UsersCredentialsGet {
     val authentication = SecurityContextHolder.getContext().authentication
     val user = authentication.principal as? LoginUserDetails
       ?: throw IllegalStateException("Principalが不正")
@@ -23,15 +23,11 @@ class UserCredentialsController(
 
     return ApiV1UsersCredentialsGet(
       dto.map {
-        ApiV1UsersCredentialsGet.Credential(
+        ApiV1UsersCredentialsGet.Key(
           credentialId = it.credentialId,
           userId = it.userId,
-          serializedAttestedCredentialData = it.serializedAttestedCredentialData,
-          serializedEnvelope = it.serializedEnvelope,
-          serializedTransports = it.serializedTransports,
-          serializedAuthenticatorExtensions = it.serializedAuthenticatorExtensions,
-          serializedClientExtensions = it.serializedClientExtensions,
-          counter = it.counter
+          aaguid = it.aaguid,
+          label = it.label
         )
       }
     )

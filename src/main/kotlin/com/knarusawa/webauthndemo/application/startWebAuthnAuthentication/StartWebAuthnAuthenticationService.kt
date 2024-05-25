@@ -23,12 +23,12 @@ class StartWebAuthnAuthenticationService(
     val challengeData = ChallengeData.of(challenge = challenge)
 
     val options = PublicKeyCredentialRequestOptions(
-      challenge,
-      60000,
-      webAuthnConfig.rpId,
-      listOf<PublicKeyCredentialDescriptor>(),
-      UserVerificationRequirement.REQUIRED,
-      null
+      /* challenge =        */ challenge,
+      /* timeout =          */ 60000,
+      /* rpId =             */ webAuthnConfig.rpId,
+      /* allowCredentials = */ listOf<PublicKeyCredentialDescriptor>(),
+      /* userVerification = */ UserVerificationRequirement.REQUIRED,
+      /* extensions =       */ null
     )
     challengeDataRepository.save(challengeData)
 

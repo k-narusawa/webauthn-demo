@@ -89,6 +89,8 @@ class FinishWebAuthnRegistrationService(
       authenticator = authenticator,
     )
 
+    log.info(credential.toString())
+
     credentialRepository.save(credential)
     challengeDataRepository.deleteByChallenge(Base64UrlUtil.encodeToString(challenge.value))
   }
