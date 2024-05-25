@@ -1,0 +1,17 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": [
+    "source.addMissingImports",
+    "source.fixAll.eslint"
+  ],
+  "eslint.validate": [
+    "javascript"
+  ],
+  "stylelint.packageManager": "npm",
+  "markdownlint.config": {
+    "default": true,
+    "MD034": false
+  },
+  "editor.formatOnSave": true,
+  "eslint.codeActionsOnSave.rules": null
+}

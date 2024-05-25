@@ -58,13 +58,10 @@ const LoginPage = () => {
   const handleWebAuthnLogin: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-
     const options = await axios(`${apiHost}/api/v1/webauthn/login/request`, {
       withCredentials: true,
     })
       .then(function (response) {
-        console.log(response.data);
         return response.data;
       })
       .catch(function (error) {
@@ -77,12 +74,13 @@ const LoginPage = () => {
 
   return (
     <>
-      <h1>Login</h1>
-      <ToastContainer />
-      <LoginForm
-        handleLogin={handleLogin}
-        handleWebAuthnLogin={handleWebAuthnLogin}
-      />
+      <div className="pt-10">
+        <ToastContainer />
+        <LoginForm
+          handleLogin={handleLogin}
+          handleWebAuthnLogin={handleWebAuthnLogin}
+        />
+      </div>
     </>
   );
 };

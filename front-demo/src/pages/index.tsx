@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useWebAuthn } from "@/hooks/userWebAuthn";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ProfileCard from "@/components/pages/top/ProfileCard";
+import { Button } from "@/components/commons/Button";
+import { PasskeyCard } from "@/components/pages/top/PasskeyCard";
 
 const HomePage = () => {
   const [userinfo, setUserInfo] = useState<any>();
@@ -65,28 +68,28 @@ const HomePage = () => {
 
   return (
     <>
-      <h1>Home</h1>
-      <ToastContainer />
-      <label>Username: {userinfo?.username}</label>
-      <br />
-      <br />
-      <button
-        onClick={() => {
-          handleRegistration();
-        }}
-        type="button"
-        className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
-      >
-        Registration
-      </button>
-      <br />
-      <button
-        onClick={handleLogout}
-        type="button"
-        className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-      >
-        Logout
-      </button>
+      <div className="pt-10 px-10">
+        <ToastContainer />
+        <ProfileCard username={userinfo?.username} />
+
+        <div className="pt-10"/>
+
+        <PasskeyCard passkeys={null} onRegister={handleRegistration} onDelete={() => {}} />
+      
+        <div className="pt-10"/>
+        
+        <div className="flex justify-center">
+          <div className="w-48">
+            <Button
+              variant="danger"
+              onClick={handleLogout}
+              type="button"
+            >
+              Logout
+            </Button>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
