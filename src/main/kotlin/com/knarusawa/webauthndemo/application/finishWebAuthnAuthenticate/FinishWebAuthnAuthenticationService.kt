@@ -1,5 +1,6 @@
 package com.knarusawa.webauthndemo.application.finishWebAuthnAuthenticate
 
+import com.knarusawa.webauthndemo.config.WebAuthnConfig
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.knarusawa.webauthndemo.domain.credentials.CredentialRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
@@ -10,9 +11,7 @@ import com.webauthn4j.converter.exception.DataConversionException
 import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.data.AuthenticationParameters
 import com.webauthn4j.data.AuthenticationRequest
-import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
-import com.webauthn4j.server.ServerProperty
 import com.webauthn4j.util.Base64UrlUtil
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,28 +19,26 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebAuthnAuthenticationService(
+  private val webAuthnConfig: WebAuthnConfig,
   private val challengeDataRepository: ChallengeDataRepository,
   private val credentialRepository: CredentialRepository,
 ) {
   companion object {
-    private const val PR_ID = "localhost"
     private val attestedCredentialDataConverter =
       AttestedCredentialDataConverter(ObjectConverter())
   }
 
   @Transactional
   fun exec(inputData: FinishWebAuthnAuthenticationInputData): FinishWebAuthnAuthenticationOutputData {
-    val origin = Origin.create("http://localhost:3000")
-
     val userId = inputData.userHandle
       ?: throw RuntimeException("ユーザーの識別に失敗しました")
 
     val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
       ?: throw IllegalArgumentException("flow is not found")
 
-    val challenge = challengeData.let { Base64UrlUtil.decode(it.challenge) }
+    val challenge = challengeData.let { DefaultChallenge(Base64UrlUtil.decode(it.challenge)) }
 
-    val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
+    val serverProperty = webAuthnConfig.serverProperty(challenge)
 
     val credentials = credentialRepository.findByCredentialId(inputData.credentialId)
       ?: throw IllegalArgumentException("credential is not found")
