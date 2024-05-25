@@ -2,7 +2,7 @@ package com.knarusawa.webauthndemo.adapter.gateway.db
 
 import com.knarusawa.webauthndemo.adapter.gateway.db.dao.CredentialsDao
 import com.knarusawa.webauthndemo.application.dto.WebAuthnCredentialDto
-import com.knarusawa.webauthndemo.application.query.CredentialsDtoQueryService
+import com.knarusawa.webauthndemo.application.query.WebAuthnCredentialDtoQueryService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class WebAuthnCredentialDtoQueryServiceImpl(
   private val credentialsDao: CredentialsDao
-) : CredentialsDtoQueryService {
+) : WebAuthnCredentialDtoQueryService {
   override fun findByUserId(userId: String): List<WebAuthnCredentialDto> {
     val record = credentialsDao.findByUserId(userId)
     return record.map {

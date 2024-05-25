@@ -23,6 +23,13 @@ export const useWebAuthn = () => {
     console.log(options);
     options.user.id = bufferDecode(options.user.id);
     options.challenge = bufferDecode(options.challenge);
+    if (options.excludeCredentials) {
+      for (let cred of options.excludeCredentials) {
+        cred.id = bufferDecode(cred.id);
+      }
+    }
+
+    console.log(options);
 
     return await navigator.credentials
       .create({
@@ -40,6 +47,7 @@ export const useWebAuthn = () => {
   };
 
   const registerCredential = async (challenge: string, credentials: any) => {
+    console.log(credentials)
     await axios(`${apiHost}/v1/webauthn/registration/results`, {
       method: "POST",
       withCredentials: true,
