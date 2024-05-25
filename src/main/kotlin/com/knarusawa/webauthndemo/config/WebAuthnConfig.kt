@@ -1,10 +1,12 @@
 package com.knarusawa.webauthndemo.config
 
+import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.data.PublicKeyCredentialRpEntity
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
@@ -27,5 +29,10 @@ class WebAuthnConfig {
     val name = this.name ?: throw RuntimeException("nameが設定されていません")
 
     return PublicKeyCredentialRpEntity(rpId, name)
+  }
+
+  @Bean
+  fun WebAuthnManager(): WebAuthnManager {
+    return WebAuthnManager.createNonStrictWebAuthnManager()
   }
 }

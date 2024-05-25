@@ -13,6 +13,7 @@ import com.webauthn4j.data.AuthenticationParameters
 import com.webauthn4j.data.AuthenticationRequest
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.util.Base64UrlUtil
+import com.webauthn4j.util.exception.WebAuthnException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class FinishWebAuthnAuthenticationService(
   private val webAuthnConfig: WebAuthnConfig,
+  private val webAuthnManager: WebAuthnManager,
   private val challengeDataRepository: ChallengeDataRepository,
   private val credentialRepository: CredentialRepository,
 ) {
@@ -36,20 +38,21 @@ class FinishWebAuthnAuthenticationService(
     val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
       ?: throw IllegalArgumentException("flow is not found")
 
-    val challenge = challengeData.let { DefaultChallenge(Base64UrlUtil.decode(it.challenge)) }
+    val challenge = DefaultChallenge(Base64UrlUtil.decode(challengeData.challenge))
 
     val serverProperty = webAuthnConfig.serverProperty(challenge)
 
     val credentials = credentialRepository.findByCredentialId(inputData.credentialId)
       ?: throw IllegalArgumentException("credential is not found")
 
+    val attestedCredentialData = attestedCredentialDataConverter.convert(
+      Base64UrlUtil.decode(credentials.serializedAttestedCredentialData)
+    )
+
     val authenticator = AuthenticatorImpl(
-      /* attestedCredentialData = */
-      attestedCredentialDataConverter.convert(
-        Base64UrlUtil.decode(credentials.serializedAttestedCredentialData)
-      ),
-      /* attestationStatement = */   null,
-      /* counter = */                credentials.counter
+      /* attestedCredentialData = */ attestedCredentialData,
+      /* attestationStatement   = */ null,
+      /* counter                = */ credentials.counter
     )
 
     val authenticationParameter = AuthenticationParameters(
@@ -68,21 +71,22 @@ class FinishWebAuthnAuthenticationService(
     )
 
     val authenticationData = try {
-      WebAuthnManager.createNonStrictWebAuthnManager().parse(authenticationRequest);
+      webAuthnManager.parse(authenticationRequest);
     } catch (ex: DataConversionException) {
       ex.printStackTrace()
       throw ex
     }
 
     try {
-      WebAuthnManager.createNonStrictWebAuthnManager()
-        .validate(authenticationRequest, authenticationParameter)
-    } catch (ex: Exception) {
+      webAuthnManager.validate(authenticationRequest, authenticationParameter)
+    } catch (ex: WebAuthnException) {
+      ex.printStackTrace()
       throw ex
     }
 
     credentials.updateCounter(authenticationData.authenticatorData!!.signCount)
     credentialRepository.save(credentials)
+    challengeDataRepository.deleteByChallenge(inputData.challenge)
 
     return FinishWebAuthnAuthenticationOutputData(userId = UserId.from(userId))
   }

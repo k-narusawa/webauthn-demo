@@ -7,7 +7,6 @@ import com.webauthn4j.data.AttestationConveyancePreference
 import com.webauthn4j.data.AuthenticatorSelectionCriteria
 import com.webauthn4j.data.PublicKeyCredentialCreationOptions
 import com.webauthn4j.data.PublicKeyCredentialParameters
-import com.webauthn4j.data.PublicKeyCredentialRpEntity
 import com.webauthn4j.data.PublicKeyCredentialType
 import com.webauthn4j.data.PublicKeyCredentialUserEntity
 import com.webauthn4j.data.ResidentKeyRequirement
@@ -55,7 +54,7 @@ class StartWebAuthnRegistrationService(
 
     val options = PublicKeyCredentialCreationOptions(
       /* rp =                     */
-      PublicKeyCredentialRpEntity(webAuthnConfig.rpId, "webauthn-demo"),
+      webAuthnConfig.publicKeyCredentialRpEntity(),
       /* user =                   */
       user,
       /* challenge =              */

@@ -14,6 +14,7 @@ import com.webauthn4j.data.RegistrationRequest
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.util.Base64UrlUtil
+import com.webauthn4j.util.exception.WebAuthnException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,11 +22,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class FinishWebAuthnRegistrationService(
   private val webAuthnConfig: WebAuthnConfig,
+  private val webAuthnManager: WebAuthnManager,
   private val challengeDataRepository: ChallengeDataRepository,
   private val credentialRepository: CredentialRepository,
 ) {
   companion object {
-    private const val PR_ID = "localhost"
     private val log = logger()
   }
 
@@ -33,7 +34,8 @@ class FinishWebAuthnRegistrationService(
   fun exec(inputData: FinishWebAuthnRegistrationInputData) {
     val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
 
-    val challenge = challengeData?.let { Base64UrlUtil.decode(it.challenge) }
+    val challenge = challengeData?.let { DefaultChallenge(Base64UrlUtil.decode(it.challenge)) }
+      ?: throw IllegalArgumentException("challenge is not found")
     val attestationObject = Base64UrlUtil.decode(inputData.attestationObject)
     val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)
 
@@ -48,21 +50,24 @@ class FinishWebAuthnRegistrationService(
       ),
     )
 
-    val serverProperty = webAuthnConfig.serverProperty(DefaultChallenge(challenge))
+    val serverProperty = webAuthnConfig.serverProperty(challenge)
     val registrationRequest = RegistrationRequest(attestationObject, clientDataJSON)
     val registrationParameters = RegistrationParameters(serverProperty, pubKeys, true)
 
     val registrationData =
-      WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
-
-    WebAuthnManager.createNonStrictWebAuthnManager()
-      .validate(registrationRequest, registrationParameters)
-
+      webAuthnManager.parse(registrationRequest)
 
     if (
       registrationData.attestationObject == null ||
       registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
     ) {
+      throw IllegalStateException("不正なデータ")
+    }
+
+    try {
+      webAuthnManager.validate(registrationRequest, registrationParameters)
+    } catch (e: WebAuthnException) {
+      log.error("WebAuthnException", e)
       throw IllegalStateException("不正なデータ")
     }
 
@@ -85,6 +90,6 @@ class FinishWebAuthnRegistrationService(
     )
 
     credentialRepository.save(credential)
-    challengeDataRepository.deleteByChallenge(Base64UrlUtil.encodeToString(challenge))
+    challengeDataRepository.deleteByChallenge(Base64UrlUtil.encodeToString(challenge.value))
   }
 }
