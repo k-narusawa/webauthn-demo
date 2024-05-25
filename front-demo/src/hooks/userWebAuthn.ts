@@ -8,7 +8,7 @@ export const useWebAuthn = () => {
   const router = useRouter();
 
   const getOptions = async () => {
-    return await axios(`${apiHost}/api/v1/webauthn/registration/start`, {
+    return await axios(`${apiHost}/v1/webauthn/registration/options`, {
       withCredentials: true,
     })
       .then((response) => {
@@ -40,7 +40,7 @@ export const useWebAuthn = () => {
   };
 
   const registerCredential = async (challenge: string, credentials: any) => {
-    await axios(`${apiHost}/api/v1/webauthn/registration/finish`, {
+    await axios(`${apiHost}/v1/webauthn/registration/results`, {
       method: "POST",
       withCredentials: true,
       data: {
@@ -89,7 +89,7 @@ export const useWebAuthn = () => {
   };
 
   const postResults = async (challenge: string, credentials: any) => {
-    await axios(`${apiHost}/api/v1/webauthn/login`, {
+    await axios(`${apiHost}/v1/webauthn/authentication`, {
       method: "POST",
       withCredentials: true,
       data: {

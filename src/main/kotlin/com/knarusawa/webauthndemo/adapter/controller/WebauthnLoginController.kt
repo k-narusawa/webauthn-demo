@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/webauthn/login")
-class WebAuthnLoginController(
+@RequestMapping("/v1/webauthn/authentication")
+class WebauthnLoginController(
     private val startWebauthnLoginService: StartWebAuthnLoginService
 ) {
-    @GetMapping("/request")
+    @GetMapping("/options")
     fun apiV1LoginWebauthnRequestGet(): ApiV1LoginWebauthnRequestGetResponse {
         val outputData = startWebauthnLoginService.exec()
 

@@ -17,9 +17,9 @@ class AuthorizeFilter : OncePerRequestFilter() {
     private val log = logger()
 
     val matchers = listOf(
-        AntPathRequestMatcher("/api/v1/login"),
-        AntPathRequestMatcher("/api/v1/webauthn/login/request"),
-        AntPathRequestMatcher("/api/v1/webauthn/login"),
+        AntPathRequestMatcher("/v1/login"),
+        AntPathRequestMatcher("/v1/webauthn/authentication"),
+        AntPathRequestMatcher("/v1/webauthn/authentication/**"),
         AntPathRequestMatcher("/h2-console/**"),
     )
     val combinedMatcher = OrRequestMatcher(matchers)

@@ -42,7 +42,7 @@ class AuthenticationFilter(
         log.info("METHOD: [${request.method}], URL: [${request.requestURI}]")
         saveContext(request, response)
 
-        if (request.requestURI == "/api/v1/webauthn/login") {
+        if (request.requestURI == "/v1/webauthn/authentication") {
             val webAuthnRequest = jacksonObjectMapper().readValue(
                 request.inputStream,
                 WebauthnAuthenticateFinishPostRequest::class.java

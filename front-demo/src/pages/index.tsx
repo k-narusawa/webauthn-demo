@@ -18,7 +18,7 @@ const HomePage = () => {
 
   useEffect(() => {
     const fetchUserInfo = async () => {
-      await axios(`${apiHost}/api/v1/userinfo`, {
+      await axios(`${apiHost}/v1/userinfo`, {
         withCredentials: true,
       })
         .then((response) => {
@@ -30,7 +30,7 @@ const HomePage = () => {
         });
     };
     const fetchUserCredentials = async () => {
-      await axios(`${apiHost}/api/v1/users/credentials`, {
+      await axios(`${apiHost}/v1/users/credentials`, {
         withCredentials: true,
       })
         .then((response) => {
@@ -53,7 +53,7 @@ const HomePage = () => {
   };
 
   const handleLogout = async () => {
-    await axios(`${apiHost}/api/v1/logout`, {
+    await axios(`${apiHost}/v1/logout`, {
       method: "POST",
       withCredentials: true,
     })
@@ -77,7 +77,7 @@ const HomePage = () => {
         <PasskeyCard passkeys={null} onRegister={handleRegistration} onDelete={() => {}} />
       
         <div className="pt-10"/>
-        
+
         <div className="flex justify-center">
           <div className="w-48">
             <Button

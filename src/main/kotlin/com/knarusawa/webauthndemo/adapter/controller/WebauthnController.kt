@@ -11,12 +11,12 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/v1/webauthn")
+@RequestMapping("/v1/webauthn/registration")
 class WebauthnController(
     private val startWebAuthnRegistrationService: StartWebAuthnRegistrationService,
     private val finishWebAuthnRegistrationService: FinishWebAuthnRegistrationService,
 ) {
-    @GetMapping("/registration/start")
+    @GetMapping("/options")
     fun webauthnRegistrationStartGet(): WebauthnRegistrationStartGetResponse {
         val authentication = SecurityContextHolder.getContext().authentication
         val user = authentication.principal as? LoginUserDetails
@@ -33,7 +33,7 @@ class WebauthnController(
         )
     }
 
-    @PostMapping("/registration/finish")
+    @PostMapping("/results")
     fun webauthnRegistrationFinishPost(
         @RequestBody body: WebauthnRegistrationFinishPostRequest
     ) {

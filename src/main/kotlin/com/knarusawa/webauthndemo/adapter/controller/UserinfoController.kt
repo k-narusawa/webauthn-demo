@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/userinfo")
+@RequestMapping("/v1/userinfo")
 class UserinfoController {
     @GetMapping
     fun apiV1UserinfoGet(): UserinfoGetResponse {

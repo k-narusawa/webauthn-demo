@@ -13,7 +13,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     const fetchUserInfo = async () => {
-      await axios(`${apiHost}/api/v1/userinfo`, {
+      await axios(`${apiHost}/v1/userinfo`, {
         withCredentials: true,
       })
         .then(() => {
@@ -39,7 +39,7 @@ const LoginPage = () => {
     };
 
     await axios
-      .post(`${apiHost}/api/v1/login`, data, {
+      .post(`${apiHost}/v1/login`, data, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -58,7 +58,7 @@ const LoginPage = () => {
   const handleWebAuthnLogin: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
-    const options = await axios(`${apiHost}/api/v1/webauthn/login/request`, {
+    const options = await axios(`${apiHost}/v1/webauthn/authentication/options`, {
       withCredentials: true,
     })
       .then(function (response) {

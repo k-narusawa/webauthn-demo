@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping("/api/v1/logout")
+@RequestMapping("/v1/logout")
 class LogoutController {
     private val log = logger()
 
