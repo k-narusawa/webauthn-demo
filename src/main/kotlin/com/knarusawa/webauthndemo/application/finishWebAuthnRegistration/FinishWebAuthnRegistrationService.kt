@@ -20,71 +20,71 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebAuthnRegistrationService(
-    private val webAuthnConfig: WebAuthnConfig,
-    private val challengeDataRepository: ChallengeDataRepository,
-    private val credentialRepository: CredentialRepository,
+  private val webAuthnConfig: WebAuthnConfig,
+  private val challengeDataRepository: ChallengeDataRepository,
+  private val credentialRepository: CredentialRepository,
 ) {
-    companion object {
-        private const val PR_ID = "localhost"
-        private val log = logger()
+  companion object {
+    private const val PR_ID = "localhost"
+    private val log = logger()
+  }
+
+  @Transactional
+  fun exec(inputData: FinishWebAuthnRegistrationInputData) {
+    val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
+
+    val challenge = challengeData?.let { Base64UrlUtil.decode(it.challenge) }
+    val attestationObject = Base64UrlUtil.decode(inputData.attestationObject)
+    val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)
+
+    val pubKeys = listOf(
+      PublicKeyCredentialParameters(
+        PublicKeyCredentialType.PUBLIC_KEY,
+        COSEAlgorithmIdentifier.ES256
+      ),
+      PublicKeyCredentialParameters(
+        PublicKeyCredentialType.PUBLIC_KEY,
+        COSEAlgorithmIdentifier.RS256
+      ),
+    )
+
+    val serverProperty = webAuthnConfig.serverProperty(DefaultChallenge(challenge))
+    val registrationRequest = RegistrationRequest(attestationObject, clientDataJSON)
+    val registrationParameters = RegistrationParameters(serverProperty, pubKeys, true)
+
+    val registrationData =
+      WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
+
+    WebAuthnManager.createNonStrictWebAuthnManager()
+      .validate(registrationRequest, registrationParameters)
+
+
+    if (
+      registrationData.attestationObject == null ||
+      registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
+    ) {
+      throw IllegalStateException("不正なデータ")
     }
 
-    @Transactional
-    fun exec(inputData: FinishWebAuthnRegistrationInputData) {
-        val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
+    val authenticator = AuthenticatorImpl(
+      /* attestedCredentialData = */
+      registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
+      /* attestationStatement =   */
+      registrationData.attestationObject!!.attestationStatement,
+      /* counter =                */
+      registrationData.attestationObject!!.authenticatorData.signCount,
+    )
 
-        val challenge = challengeData?.let { Base64UrlUtil.decode(it.challenge) }
-        val attestationObject = Base64UrlUtil.decode(inputData.attestationObject)
-        val clientDataJSON = Base64UrlUtil.decode(inputData.clientDataJSON)
+    val credentialId =
+      registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
 
-        val pubKeys = listOf(
-            PublicKeyCredentialParameters(
-                PublicKeyCredentialType.PUBLIC_KEY,
-                COSEAlgorithmIdentifier.ES256
-            ),
-            PublicKeyCredentialParameters(
-                PublicKeyCredentialType.PUBLIC_KEY,
-                COSEAlgorithmIdentifier.RS256
-            ),
-        )
+    val credential = Credential.of(
+      credentialId = credentialId,
+      userId = inputData.userId,
+      authenticator = authenticator,
+    )
 
-        val serverProperty = webAuthnConfig.serverProperty(DefaultChallenge(challenge))
-        val registrationRequest = RegistrationRequest(attestationObject, clientDataJSON)
-        val registrationParameters = RegistrationParameters(serverProperty, pubKeys, true)
-
-        val registrationData =
-            WebAuthnManager.createNonStrictWebAuthnManager().parse(registrationRequest);
-
-        WebAuthnManager.createNonStrictWebAuthnManager()
-            .validate(registrationRequest, registrationParameters)
-
-
-        if (
-            registrationData.attestationObject == null ||
-            registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
-        ) {
-            throw IllegalStateException("不正なデータ")
-        }
-
-        val authenticator = AuthenticatorImpl(
-            /* attestedCredentialData = */
-            registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
-            /* attestationStatement =   */
-            registrationData.attestationObject!!.attestationStatement,
-            /* counter =                */
-            registrationData.attestationObject!!.authenticatorData.signCount,
-        )
-
-        val credentialId =
-            registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
-
-        val credential = Credential.of(
-            credentialId = credentialId,
-            userId = inputData.userId,
-            authenticator = authenticator,
-        )
-
-        credentialRepository.save(credential)
-        challengeDataRepository.deleteByChallenge(Base64UrlUtil.encodeToString(challenge))
-    }
+    credentialRepository.save(credential)
+    challengeDataRepository.deleteByChallenge(Base64UrlUtil.encodeToString(challenge))
+  }
 }

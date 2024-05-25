@@ -20,73 +20,73 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebAuthnAuthenticationService(
-    private val challengeDataRepository: ChallengeDataRepository,
-    private val credentialRepository: CredentialRepository,
+  private val challengeDataRepository: ChallengeDataRepository,
+  private val credentialRepository: CredentialRepository,
 ) {
-    companion object {
-        private const val PR_ID = "localhost"
-        private val attestedCredentialDataConverter =
-            AttestedCredentialDataConverter(ObjectConverter())
+  companion object {
+    private const val PR_ID = "localhost"
+    private val attestedCredentialDataConverter =
+      AttestedCredentialDataConverter(ObjectConverter())
+  }
+
+  @Transactional
+  fun exec(inputData: FinishWebAuthnAuthenticationInputData): FinishWebAuthnAuthenticationOutputData {
+    val origin = Origin.create("http://localhost:3000")
+
+    val userId = inputData.userHandle
+      ?: throw RuntimeException("ユーザーの識別に失敗しました")
+
+    val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
+      ?: throw IllegalArgumentException("flow is not found")
+
+    val challenge = challengeData.let { Base64UrlUtil.decode(it.challenge) }
+
+    val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
+
+    val credentials = credentialRepository.findByCredentialId(inputData.credentialId)
+      ?: throw IllegalArgumentException("credential is not found")
+
+    val authenticator = AuthenticatorImpl(
+      /* attestedCredentialData = */
+      attestedCredentialDataConverter.convert(
+        Base64UrlUtil.decode(credentials.serializedAttestedCredentialData)
+      ),
+      /* attestationStatement = */   null,
+      /* counter = */                credentials.counter
+    )
+
+    val authenticationParameter = AuthenticationParameters(
+      serverProperty,
+      authenticator,
+      listOf(Base64UrlUtil.decode(credentials.credentialId)),
+      false
+    )
+
+    val authenticationRequest = AuthenticationRequest(
+      /* credentialId = */      Base64UrlUtil.decode(inputData.credentialId),
+      /* userHandle = */        inputData.userHandle.let { Base64UrlUtil.decode(it) },
+      /* authenticatorData = */ Base64UrlUtil.decode(inputData.authenticatorData),
+      /* clientDataJSON = */    Base64UrlUtil.decode(inputData.clientDataJSON),
+      /* signature = */         Base64UrlUtil.decode(inputData.signature),
+    )
+
+    val authenticationData = try {
+      WebAuthnManager.createNonStrictWebAuthnManager().parse(authenticationRequest);
+    } catch (ex: DataConversionException) {
+      ex.printStackTrace()
+      throw ex
     }
 
-    @Transactional
-    fun exec(inputData: FinishWebAuthnAuthenticationInputData): FinishWebAuthnAuthenticationOutputData {
-        val origin = Origin.create("http://localhost:3000")
-
-        val userId = inputData.userHandle
-            ?: throw RuntimeException("ユーザーの識別に失敗しました")
-
-        val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
-            ?: throw IllegalArgumentException("flow is not found")
-
-        val challenge = challengeData.let { Base64UrlUtil.decode(it.challenge) }
-
-        val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
-
-        val credentials = credentialRepository.findByCredentialId(inputData.credentialId)
-            ?: throw IllegalArgumentException("credential is not found")
-
-        val authenticator = AuthenticatorImpl(
-            /* attestedCredentialData = */
-            attestedCredentialDataConverter.convert(
-                Base64UrlUtil.decode(credentials.serializedAttestedCredentialData)
-            ),
-            /* attestationStatement = */   null,
-            /* counter = */                credentials.counter
-        )
-
-        val authenticationParameter = AuthenticationParameters(
-            serverProperty,
-            authenticator,
-            listOf(Base64UrlUtil.decode(credentials.credentialId)),
-            false
-        )
-
-        val authenticationRequest = AuthenticationRequest(
-            /* credentialId = */      Base64UrlUtil.decode(inputData.credentialId),
-            /* userHandle = */        inputData.userHandle.let { Base64UrlUtil.decode(it) },
-            /* authenticatorData = */ Base64UrlUtil.decode(inputData.authenticatorData),
-            /* clientDataJSON = */    Base64UrlUtil.decode(inputData.clientDataJSON),
-            /* signature = */         Base64UrlUtil.decode(inputData.signature),
-        )
-
-        val authenticationData = try {
-            WebAuthnManager.createNonStrictWebAuthnManager().parse(authenticationRequest);
-        } catch (ex: DataConversionException) {
-            ex.printStackTrace()
-            throw ex
-        }
-
-        try {
-            WebAuthnManager.createNonStrictWebAuthnManager()
-                .validate(authenticationRequest, authenticationParameter)
-        } catch (ex: Exception) {
-            throw ex
-        }
-
-        credentials.updateCounter(authenticationData.authenticatorData!!.signCount)
-        credentialRepository.save(credentials)
-
-        return FinishWebAuthnAuthenticationOutputData(userId = UserId.from(userId))
+    try {
+      WebAuthnManager.createNonStrictWebAuthnManager()
+        .validate(authenticationRequest, authenticationParameter)
+    } catch (ex: Exception) {
+      throw ex
     }
+
+    credentials.updateCounter(authenticationData.authenticatorData!!.signCount)
+    credentialRepository.save(credentials)
+
+    return FinishWebAuthnAuthenticationOutputData(userId = UserId.from(userId))
+  }
 }

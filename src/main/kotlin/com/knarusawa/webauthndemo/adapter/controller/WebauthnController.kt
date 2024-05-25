@@ -8,49 +8,53 @@ import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWeb
 import com.knarusawa.webauthndemo.application.startWebAuthnRegistration.StartWebAuthnRegistrationService
 import com.knarusawa.webauthndemo.domain.user.LoginUserDetails
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v1/webauthn/registration")
 class WebauthnController(
-    private val startWebAuthnRegistrationService: StartWebAuthnRegistrationService,
-    private val finishWebAuthnRegistrationService: FinishWebAuthnRegistrationService,
+  private val startWebAuthnRegistrationService: StartWebAuthnRegistrationService,
+  private val finishWebAuthnRegistrationService: FinishWebAuthnRegistrationService,
 ) {
-    @GetMapping("/options")
-    fun webauthnRegistrationStartGet(): WebauthnRegistrationStartGetResponse {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val user = authentication.principal as? LoginUserDetails
-            ?: throw IllegalStateException("Principalが不正")
+  @GetMapping("/options")
+  fun webauthnRegistrationStartGet(): WebauthnRegistrationStartGetResponse {
+    val authentication = SecurityContextHolder.getContext().authentication
+    val user = authentication.principal as? LoginUserDetails
+      ?: throw IllegalStateException("Principalが不正")
 
-        val inputData = StartWebAuthnRegistrationInputData(
-            userId = user.userId,
-            username = user.username,
-        )
-        val outputData = startWebAuthnRegistrationService.exec(inputData)
+    val inputData = StartWebAuthnRegistrationInputData(
+      userId = user.userId,
+      username = user.username,
+    )
+    val outputData = startWebAuthnRegistrationService.exec(inputData)
 
-        return WebauthnRegistrationStartGetResponse.from(
-            options = outputData.options
-        )
-    }
+    return WebauthnRegistrationStartGetResponse.from(
+      options = outputData.options
+    )
+  }
 
-    @PostMapping("/results")
-    fun webauthnRegistrationFinishPost(
-        @RequestBody body: WebauthnRegistrationFinishPostRequest
-    ) {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val user = authentication.principal as? LoginUserDetails
-            ?: throw IllegalStateException("Principalが不正")
+  @PostMapping("/results")
+  fun webauthnRegistrationFinishPost(
+    @RequestBody body: WebauthnRegistrationFinishPostRequest
+  ) {
+    val authentication = SecurityContextHolder.getContext().authentication
+    val user = authentication.principal as? LoginUserDetails
+      ?: throw IllegalStateException("Principalが不正")
 
-        val inputData = FinishWebAuthnRegistrationInputData(
-            challenge = body.challenge,
-            userId = user.userId,
-            username = user.username,
-            id = body.id,
-            rawId = body.rawId,
-            type = body.type,
-            attestationObject = body.response.attestationObject,
-            clientDataJSON = body.response.clientDataJSON,
-        )
-        finishWebAuthnRegistrationService.exec(inputData)
-    }
+    val inputData = FinishWebAuthnRegistrationInputData(
+      challenge = body.challenge,
+      userId = user.userId,
+      username = user.username,
+      id = body.id,
+      rawId = body.rawId,
+      type = body.type,
+      attestationObject = body.response.attestationObject,
+      clientDataJSON = body.response.clientDataJSON,
+    )
+    finishWebAuthnRegistrationService.exec(inputData)
+  }
 }

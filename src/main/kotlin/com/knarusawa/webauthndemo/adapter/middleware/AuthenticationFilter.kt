@@ -20,69 +20,69 @@ import org.springframework.security.web.context.SecurityContextRepository
 
 
 class AuthenticationFilter(
-    private val authenticationManager: AuthenticationManager
+  private val authenticationManager: AuthenticationManager
 ) : UsernamePasswordAuthenticationFilter() {
-    companion object {
-        private val log = logger()
-    }
+  companion object {
+    private val log = logger()
+  }
 
-    private var customSecurityContextRepository: SecurityContextRepository? = null
+  private var customSecurityContextRepository: SecurityContextRepository? = null
 
-    init {
-        this.customSecurityContextRepository = DelegatingSecurityContextRepository(
-            RequestAttributeSecurityContextRepository(),
-            HttpSessionSecurityContextRepository()
+  init {
+    this.customSecurityContextRepository = DelegatingSecurityContextRepository(
+      RequestAttributeSecurityContextRepository(),
+      HttpSessionSecurityContextRepository()
+    )
+    super.setSecurityContextRepository(customSecurityContextRepository)
+  }
+
+  override fun attemptAuthentication(
+    request: HttpServletRequest, response: HttpServletResponse
+  ): Authentication {
+    log.info("METHOD: [${request.method}], URL: [${request.requestURI}]")
+    saveContext(request, response)
+
+    if (request.requestURI == "/v1/webauthn/authentication") {
+      val webAuthnRequest = jacksonObjectMapper().readValue(
+        request.inputStream,
+        WebauthnAuthenticateFinishPostRequest::class.java
+      )
+
+      log.info("WebAuthn login challenge is ${webAuthnRequest.challenge}")
+
+      val credentials = FinishWebAuthnAuthenticationInputData(
+        challenge = webAuthnRequest.challenge,
+        credentialId = webAuthnRequest.rawId,
+        clientDataJSON = webAuthnRequest.response.clientDataJSON,
+        authenticatorData = webAuthnRequest.response.authenticatorData,
+        signature = webAuthnRequest.response.signature,
+        userHandle = webAuthnRequest.response.userHandle
+      )
+
+      val authRequest: AbstractAuthenticationToken =
+        WebauthnAssertionAuthenticationToken(
+          principal = webAuthnRequest.challenge,
+          credentials = credentials,
         )
-        super.setSecurityContextRepository(customSecurityContextRepository)
-    }
-
-    override fun attemptAuthentication(
-        request: HttpServletRequest, response: HttpServletResponse
-    ): Authentication {
-        log.info("METHOD: [${request.method}], URL: [${request.requestURI}]")
-        saveContext(request, response)
-
-        if (request.requestURI == "/v1/webauthn/authentication") {
-            val webAuthnRequest = jacksonObjectMapper().readValue(
-                request.inputStream,
-                WebauthnAuthenticateFinishPostRequest::class.java
-            )
-
-            log.info("WebAuthn login challenge is ${webAuthnRequest.challenge}")
-
-            val credentials = FinishWebAuthnAuthenticationInputData(
-                challenge = webAuthnRequest.challenge,
-                credentialId = webAuthnRequest.rawId,
-                clientDataJSON = webAuthnRequest.response.clientDataJSON,
-                authenticatorData = webAuthnRequest.response.authenticatorData,
-                signature = webAuthnRequest.response.signature,
-                userHandle = webAuthnRequest.response.userHandle
-            )
-
-            val authRequest: AbstractAuthenticationToken =
-                WebauthnAssertionAuthenticationToken(
-                    principal = webAuthnRequest.challenge,
-                    credentials = credentials,
-                )
 
 //            setDetails(request, authRequest)
 
-            return this.authenticationManager.authenticate(authRequest)
-        }
-
-        val username = obtainUsername(request)
-        val password = obtainPassword(request)
-
-        val authRequest = UsernamePasswordAuthenticationToken(username, password)
-
-        setDetails(request, authRequest)
-        return this.authenticationManager.authenticate(authRequest)
+      return this.authenticationManager.authenticate(authRequest)
     }
 
-    // https://qiita.com/k-taichi/items/1787144fcad5d7bc8e41
-    private fun saveContext(request: HttpServletRequest, response: HttpServletResponse?) {
-        val securityContext = SecurityContextHolder.getContext()
-        SecurityContextHolder.setContext(securityContext)
-        customSecurityContextRepository!!.saveContext(securityContext, request, response)
-    }
+    val username = obtainUsername(request)
+    val password = obtainPassword(request)
+
+    val authRequest = UsernamePasswordAuthenticationToken(username, password)
+
+    setDetails(request, authRequest)
+    return this.authenticationManager.authenticate(authRequest)
+  }
+
+  // https://qiita.com/k-taichi/items/1787144fcad5d7bc8e41
+  private fun saveContext(request: HttpServletRequest, response: HttpServletResponse?) {
+    val securityContext = SecurityContextHolder.getContext()
+    SecurityContextHolder.setContext(securityContext)
+    customSecurityContextRepository!!.saveContext(securityContext, request, response)
+  }
 }
