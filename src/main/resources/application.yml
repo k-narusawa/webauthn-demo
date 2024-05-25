@@ -21,3 +21,10 @@ spring:
       org:
         springframework:
           security: DEBUG
+
+env:
+  webauthn:
+    rp-id: localhost
+    origins:
+      - http://localhost:3000
+      - http://localhost:3001

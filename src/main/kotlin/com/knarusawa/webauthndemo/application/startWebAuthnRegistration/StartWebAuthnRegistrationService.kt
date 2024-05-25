@@ -1,5 +1,6 @@
 package com.knarusawa.webauthndemo.application.startWebAuthnRegistration
 
+import com.knarusawa.webauthndemo.config.WebAuthnConfig
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeData
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.webauthn4j.data.*
@@ -13,15 +14,11 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class StartWebAuthnRegistrationService(
-    private val challengeDataRepository: ChallengeDataRepository
+    private val webAuthnConfig: WebAuthnConfig,
+    private val challengeDataRepository: ChallengeDataRepository,
 ) {
-    companion object {
-        private const val PR_ID = "localhost"
-    }
-
     @Transactional
     fun exec(inputData: StartWebAuthnRegistrationInputData): StartWebAuthnRegistrationOutputData {
-        val rpId = PR_ID
         val challenge = DefaultChallenge()
 
         val pubKeyCredParams = listOf(
@@ -49,15 +46,24 @@ class StartWebAuthnRegistrationService(
         )
 
         val options = PublicKeyCredentialCreationOptions(
-            /* rp =                     */ PublicKeyCredentialRpEntity(rpId, "webauthn-demo"),
-            /* user =                   */ user,
-            /* challenge =              */ challenge,
-            /* pubKeyCredParams =       */ pubKeyCredParams,
-            /* timeout =                */ TimeUnit.SECONDS.toMillis(180000),
-            /* excludeCredentials =     */ null,
-            /* authenticatorSelection = */ authenticatorSelectionCriteria,
-            /* attestation =            */ AttestationConveyancePreference.DIRECT,
-            /* extensions =             */ null,
+            /* rp =                     */
+            PublicKeyCredentialRpEntity(webAuthnConfig.rpId, "webauthn-demo"),
+            /* user =                   */
+            user,
+            /* challenge =              */
+            challenge,
+            /* pubKeyCredParams =       */
+            pubKeyCredParams,
+            /* timeout =                */
+            TimeUnit.SECONDS.toMillis(180000),
+            /* excludeCredentials =     */
+            null,
+            /* authenticatorSelection = */
+            authenticatorSelectionCriteria,
+            /* attestation =            */
+            AttestationConveyancePreference.DIRECT,
+            /* extensions =             */
+            null,
         )
 
         val challengeData = ChallengeData.of(challenge = challenge)

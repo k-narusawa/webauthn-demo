@@ -3,17 +3,21 @@ package com.knarusawa.webauthndemo.config
 import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import com.webauthn4j.server.ServerProperty
-import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.context.annotation.Bean
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.annotation.Configuration
 
-@Configurable
+@Configuration
+@ConfigurationProperties(prefix = "env.webauthn")
 class WebAuthnConfig {
+  var rpId: String? = null
+  var origins: List<String> = mutableListOf()
 
-    @Bean
-    fun serverProperty(challenge: ByteArray): ServerProperty {
-        val origin = Origin.create("http://localhost:3000")
-        val rpId = "localhost"
+  fun serverProperty(challenge: DefaultChallenge): ServerProperty {
+    val origins = this.origins.map {
+      Origin.create(it)
+    }.toSet()
+    val rpId = this.rpId ?: throw RuntimeException("rpIdが設定されていません")
 
-        return ServerProperty(origin, rpId, DefaultChallenge(challenge), null)
-    }
+    return ServerProperty(origins, rpId, challenge, null)
+  }
 }

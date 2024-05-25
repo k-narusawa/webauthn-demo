@@ -1,5 +1,6 @@
 package com.knarusawa.webauthndemo.application.finishWebAuthnRegistration
 
+import com.knarusawa.webauthndemo.config.WebAuthnConfig
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.knarusawa.webauthndemo.domain.credentials.Credential
 import com.knarusawa.webauthndemo.domain.credentials.CredentialRepository
@@ -11,9 +12,7 @@ import com.webauthn4j.data.PublicKeyCredentialType
 import com.webauthn4j.data.RegistrationParameters
 import com.webauthn4j.data.RegistrationRequest
 import com.webauthn4j.data.attestation.statement.COSEAlgorithmIdentifier
-import com.webauthn4j.data.client.Origin
 import com.webauthn4j.data.client.challenge.DefaultChallenge
-import com.webauthn4j.server.ServerProperty
 import com.webauthn4j.util.Base64UrlUtil
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FinishWebAuthnRegistrationService(
+    private val webAuthnConfig: WebAuthnConfig,
     private val challengeDataRepository: ChallengeDataRepository,
     private val credentialRepository: CredentialRepository,
 ) {
@@ -31,7 +31,6 @@ class FinishWebAuthnRegistrationService(
 
     @Transactional
     fun exec(inputData: FinishWebAuthnRegistrationInputData) {
-        val origin = Origin.create("http://localhost:3000")
         val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
 
         val challenge = challengeData?.let { Base64UrlUtil.decode(it.challenge) }
@@ -49,7 +48,7 @@ class FinishWebAuthnRegistrationService(
             ),
         )
 
-        val serverProperty = ServerProperty(origin, PR_ID, DefaultChallenge(challenge), null)
+        val serverProperty = webAuthnConfig.serverProperty(DefaultChallenge(challenge))
         val registrationRequest = RegistrationRequest(attestationObject, clientDataJSON)
         val registrationParameters = RegistrationParameters(serverProperty, pubKeys, true)
 
