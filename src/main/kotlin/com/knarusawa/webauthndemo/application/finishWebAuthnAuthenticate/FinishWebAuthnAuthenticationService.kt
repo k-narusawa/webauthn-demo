@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.application.finishWebAuthnLogin
+package com.knarusawa.webauthndemo.application.finishWebAuthnAuthenticate
 
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.knarusawa.webauthndemo.domain.credentials.CredentialRepository
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 
 
 @Service
-class FinishWebAuthnLoginService(
+class FinishWebAuthnAuthenticationService(
     private val challengeDataRepository: ChallengeDataRepository,
     private val credentialRepository: CredentialRepository,
 ) {
@@ -30,7 +30,7 @@ class FinishWebAuthnLoginService(
     }
 
     @Transactional
-    fun exec(inputData: FinishWebAuthnLoginInputData): FinishWebAuthnLoginOutputData {
+    fun exec(inputData: FinishWebAuthnAuthenticationInputData): FinishWebAuthnAuthenticationOutputData {
         val origin = Origin.create("http://localhost:3000")
 
         val userId = inputData.userHandle
@@ -87,6 +87,6 @@ class FinishWebAuthnLoginService(
         credentials.updateCounter(authenticationData.authenticatorData!!.signCount)
         credentialRepository.save(credentials)
 
-        return FinishWebAuthnLoginOutputData(userId = UserId.from(userId))
+        return FinishWebAuthnAuthenticationOutputData(userId = UserId.from(userId))
     }
 }

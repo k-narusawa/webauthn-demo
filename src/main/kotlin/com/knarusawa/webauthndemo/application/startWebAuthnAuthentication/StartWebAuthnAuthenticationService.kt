@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.application.startWebAuthnLogin
+package com.knarusawa.webauthndemo.application.startWebAuthnAuthentication
 
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeData
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 
 
 @Service
-class StartWebAuthnLoginService(
+class StartWebAuthnAuthenticationService(
     private val challengeDataRepository: ChallengeDataRepository,
 ) {
     companion object {
@@ -20,7 +20,7 @@ class StartWebAuthnLoginService(
     }
 
     @Transactional
-    fun exec(): StartWebAuthnLoginOutputData {
+    fun exec(): StartWebAuthnAuthenticationOutputData {
         val challenge = DefaultChallenge()
 
         val challengeData = ChallengeData.of(challenge = challenge)
@@ -35,7 +35,7 @@ class StartWebAuthnLoginService(
         )
         challengeDataRepository.save(challengeData)
 
-        return StartWebAuthnLoginOutputData(
+        return StartWebAuthnAuthenticationOutputData(
             challenge = challengeData.challenge,
             options = options
         )
