@@ -1,5 +1,6 @@
 package com.knarusawa.webauthndemo.adapter.gateway.db.record
 
+import com.knarusawa.webauthndemo.domain.credentials.AttestationStatementConverter
 import com.knarusawa.webauthndemo.domain.credentials.Credential
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -25,6 +26,9 @@ data class CredentialsRecord(
   @Column(name = "attested_credential_data")
   val attestedCredentialData: String,
 
+  @Column(name = "attestation_statement")
+  val attestationStatement: String,
+
   @Column(name = "attestation_statement_format")
   val attestationStatementFormat: String,
 
@@ -47,6 +51,7 @@ data class CredentialsRecord(
       aaguid = credential.aaguid.aaguid,
       label = credential.label,
       attestedCredentialData = credential.attestedCredentialData,
+      attestationStatement = AttestationStatementConverter().convertToString(credential.attestationStatement),
       attestationStatementFormat = credential.attestationStatementFormat,
       transports = credential.transports,
       authenticatorExtensions = credential.authenticatorExtensions,

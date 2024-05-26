@@ -4,6 +4,7 @@ import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.util.ObjectConverter
+import com.webauthn4j.data.attestation.statement.AttestationStatement
 import com.webauthn4j.util.Base64UrlUtil
 
 class Credential private constructor(
@@ -12,6 +13,7 @@ class Credential private constructor(
   val aaguid: AAGUID,
   label: String,
   val attestedCredentialData: String,
+  val attestationStatement: AttestationStatement,
   val attestationStatementFormat: String,
   val transports: String,
   val authenticatorExtensions: String,
@@ -45,6 +47,9 @@ class Credential private constructor(
         aaguid = aaguid,
         label = aaguid.labael,
         attestedCredentialData = Base64UrlUtil.encodeToString(serializedAttestedCredentialData),
+        attestationStatement = authenticator.attestationStatement ?: throw IllegalArgumentException(
+          "attestationStatement is not found"
+        ),
         attestationStatementFormat = authenticator.attestationStatement!!.format,
         transports = authenticator.transports?.let {
           objectConverter.jsonConverter.writeValueAsString(
@@ -69,6 +74,7 @@ class Credential private constructor(
       aaguid = AAGUID.fromAAGUID(record.aaguid),
       label = record.label,
       attestedCredentialData = record.attestedCredentialData,
+      attestationStatement = AttestationStatementConverter().convertToEntityAttribute(record.attestationStatement),
       attestationStatementFormat = record.attestationStatementFormat,
       transports = record.transports,
       authenticatorExtensions = record.authenticatorExtensions,
@@ -93,6 +99,7 @@ class Credential private constructor(
       aaguid='$aaguid',
       label='$label',
       attestedCredentialData='$attestedCredentialData',
+      attestationStatement='$attestationStatement',
       attestationStatementFormat='$attestationStatementFormat',
       transports=$transports, 
       authenticatorExtensions='$authenticatorExtensions', 
