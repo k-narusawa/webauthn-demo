@@ -1,6 +1,7 @@
 package com.knarusawa.webauthndemo.domain.credentials
 
 import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
+import com.knarusawa.webauthndemo.domain.credentials.converter.AttestationStatementConverter
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.AuthenticatorTransportConverter

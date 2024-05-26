@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.domain.credentials
+package com.knarusawa.webauthndemo.domain.credentials.converter
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty

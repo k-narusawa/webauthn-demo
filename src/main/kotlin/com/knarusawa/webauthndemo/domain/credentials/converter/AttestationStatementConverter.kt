@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.domain.credentials
+package com.knarusawa.webauthndemo.domain.credentials.converter
 
 import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.data.attestation.statement.AttestationStatement
