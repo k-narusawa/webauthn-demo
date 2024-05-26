@@ -1,4 +1,4 @@
-package com.knarusawa.webauthndemo.domain.aaguid
+package com.knarusawa.webauthndemo.domain.credentials
 
 
 enum class AAGUID(val aaguid: String, val labael: String) {
@@ -25,11 +25,12 @@ enum class AAGUID(val aaguid: String, val labael: String) {
   THALES_PIN_IOS_SDK("17290f1e-c212-34d0-1423-365d729f09d9", "Thales PIN iOS SDK"),
   PROTON_PASS("50726f74-6f6e-5061-7373-50726f746f6e", "Proton Pass"),
   KEEPASSXC("fdb141b2-5d84-443e-8a35-4698c205a502", "KeePassXC"),
+  UNKNOWN("00000000-0000-0000-0000-000000000000", "Unknown")
   ;
 
   companion object {
-    fun fromAAGUID(aaguid: String): AAGUID? {
-      return entries.find { it.aaguid == aaguid }
+    fun fromAAGUID(aaguid: String): AAGUID {
+      return entries.find { it.aaguid == aaguid } ?: UNKNOWN
     }
   }
 }

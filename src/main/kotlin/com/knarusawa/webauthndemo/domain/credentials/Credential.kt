@@ -1,7 +1,6 @@
 package com.knarusawa.webauthndemo.domain.credentials
 
 import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
-import com.knarusawa.webauthndemo.domain.aaguid.AAGUID
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.util.ObjectConverter
@@ -10,7 +9,7 @@ import com.webauthn4j.util.Base64UrlUtil
 class Credential private constructor(
   val credentialId: String,
   val userId: String,
-  val aaguid: String,
+  val aaguid: AAGUID,
   label: String,
   val attestedCredentialData: String,
   val attestationStatementFormat: String,
@@ -37,15 +36,14 @@ class Credential private constructor(
       val serializedAttestedCredentialData =
         attestedCredentialDataConverter.convert(authenticator.attestedCredentialData)
 
-      val aaguid = authenticator.attestedCredentialData.aaguid.value.toString()
-
-      val label = AAGUID.fromAAGUID(aaguid)?.labael ?: "Unknown AAGUID"
+      val rawAAGUID = authenticator.attestedCredentialData.aaguid.value.toString()
+      val aaguid = AAGUID.fromAAGUID(rawAAGUID)
 
       return Credential(
         credentialId = Base64UrlUtil.encodeToString(credentialId),
         userId = userId,
-        aaguid = authenticator.attestedCredentialData.aaguid.value.toString(),
-        label = label,
+        aaguid = aaguid,
+        label = aaguid?.labael ?: "Unknown",
         attestedCredentialData = Base64UrlUtil.encodeToString(serializedAttestedCredentialData),
         attestationStatementFormat = authenticator.attestationStatement!!.format,
         transports = authenticator.transports?.let {
@@ -68,7 +66,7 @@ class Credential private constructor(
     fun from(record: CredentialsRecord) = Credential(
       credentialId = record.credentialId,
       userId = record.userId,
-      aaguid = record.aaguid,
+      aaguid = AAGUID.fromAAGUID(record.aaguid),
       label = record.label,
       attestedCredentialData = record.attestedCredentialData,
       attestationStatementFormat = record.attestationStatementFormat,

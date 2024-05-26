@@ -44,7 +44,7 @@ data class CredentialsRecord(
     fun from(credential: Credential) = CredentialsRecord(
       credentialId = credential.credentialId,
       userId = credential.userId,
-      aaguid = credential.aaguid,
+      aaguid = credential.aaguid.aaguid,
       label = credential.label,
       attestedCredentialData = credential.attestedCredentialData,
       attestationStatementFormat = credential.attestationStatementFormat,
