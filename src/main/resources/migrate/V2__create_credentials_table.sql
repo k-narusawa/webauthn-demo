@@ -9,7 +9,7 @@ CREATE TABLE credentials
     attestation_statement_format VARCHAR(255)             NOT NULL,
     transports                   VARCHAR(255)             NOT NULL,
     authenticator_extensions     VARCHAR(255)             NOT NULL,
-    client_extensions            VARCHAR(255)             NOT NULL,
+    client_extensions            VARCHAR(255)             ,
     counter                      INT                      NOT NULL,
     created_at                   DATETIME                 NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                    DATETIME                 NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

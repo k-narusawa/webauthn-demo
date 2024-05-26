@@ -4,11 +4,14 @@ import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
 import com.knarusawa.webauthndemo.domain.credentials.converter.AttestationStatementConverter
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
+import com.webauthn4j.converter.AuthenticationExtensionsClientOutputsConverter
 import com.webauthn4j.converter.AuthenticatorTransportConverter
 import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.data.AuthenticatorTransport
 import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData
 import com.webauthn4j.data.attestation.statement.AttestationStatement
+import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientOutputs
+import com.webauthn4j.data.extension.client.RegistrationExtensionClientOutput
 import com.webauthn4j.util.Base64UrlUtil
 
 class Credential private constructor(
@@ -21,7 +24,7 @@ class Credential private constructor(
   val attestationStatementFormat: String,
   val transports: Set<AuthenticatorTransport>,
   val authenticatorExtensions: String,
-  val clientExtensions: String,
+  val clientExtensions: AuthenticationExtensionsClientOutputs<RegistrationExtensionClientOutput>?,
   counter: Long,
 ) {
   var label: String = label
@@ -33,6 +36,8 @@ class Credential private constructor(
     private val objectConverter = ObjectConverter()
     private val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
     private val transportConverter = AuthenticatorTransportConverter()
+    private val clientOutputsConverter =
+      AuthenticationExtensionsClientOutputsConverter(objectConverter)
 
     fun of(
       credentialId: ByteArray?,
@@ -57,9 +62,7 @@ class Credential private constructor(
             authenticator.authenticatorExtensions
           )
         ),
-        clientExtensions = objectConverter.jsonConverter.writeValueAsString(
-          authenticator.clientExtensions
-        ),
+        clientExtensions = authenticator.clientExtensions,
         counter = authenticator.counter,
       )
     }
@@ -78,7 +81,9 @@ class Credential private constructor(
         transportConverter.convert(it)
       }.toSet(),
       authenticatorExtensions = record.authenticatorExtensions,
-      clientExtensions = record.clientExtensions,
+      clientExtensions = record.clientExtensions?.let {
+        clientOutputsConverter.convert(record.clientExtensions)
+      },
       counter = record.counter,
     )
   }

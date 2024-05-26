@@ -3,6 +3,7 @@ package com.knarusawa.webauthndemo.adapter.gateway.db.record
 import com.knarusawa.webauthndemo.domain.credentials.Credential
 import com.knarusawa.webauthndemo.domain.credentials.converter.AttestationStatementConverter
 import com.webauthn4j.converter.AttestedCredentialDataConverter
+import com.webauthn4j.converter.AuthenticationExtensionsClientOutputsConverter
 import com.webauthn4j.converter.AuthenticatorTransportConverter
 import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.util.Base64UrlUtil
@@ -43,7 +44,7 @@ data class CredentialsRecord(
   val authenticatorExtensions: String,
 
   @Column(name = "client_extensions")
-  val clientExtensions: String,
+  val clientExtensions: String?,
 
   @Column(name = "counter")
   val counter: Long,
@@ -51,6 +52,9 @@ data class CredentialsRecord(
   companion object {
     private val objectConverter = ObjectConverter()
     private val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
+    private val clientOutputsConverter =
+      AuthenticationExtensionsClientOutputsConverter(objectConverter)
+
     fun from(credential: Credential) = CredentialsRecord(
       credentialId = credential.credentialId,
       userId = credential.userId,
@@ -67,7 +71,9 @@ data class CredentialsRecord(
         AuthenticatorTransportConverter().convertToString(it)
       },
       authenticatorExtensions = credential.authenticatorExtensions,
-      clientExtensions = credential.clientExtensions,
+      clientExtensions = credential.clientExtensions?.let {
+        clientOutputsConverter.convertToString(credential.clientExtensions)
+      },
       counter = credential.counter,
     )
   }
