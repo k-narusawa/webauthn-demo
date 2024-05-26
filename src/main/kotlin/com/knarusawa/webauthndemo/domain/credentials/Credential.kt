@@ -43,7 +43,7 @@ class Credential private constructor(
         credentialId = Base64UrlUtil.encodeToString(credentialId),
         userId = userId,
         aaguid = aaguid,
-        label = aaguid?.labael ?: "Unknown",
+        label = aaguid.labael,
         attestedCredentialData = Base64UrlUtil.encodeToString(serializedAttestedCredentialData),
         attestationStatementFormat = authenticator.attestationStatement!!.format,
         transports = authenticator.transports?.let {
