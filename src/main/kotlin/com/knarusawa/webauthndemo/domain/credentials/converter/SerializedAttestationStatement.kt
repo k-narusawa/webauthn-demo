@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.webauthn4j.data.attestation.statement.AttestationStatement
 import java.util.*
 
-class AttestationStatementSerializationContainer @JsonCreator constructor(
+class SerializedAttestationStatement @JsonCreator constructor(
         @field:JsonTypeInfo(
                 use = JsonTypeInfo.Id.NAME,
                 include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
@@ -22,7 +22,7 @@ class AttestationStatementSerializationContainer @JsonCreator constructor(
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
         if (o == null || javaClass != o.javaClass) return false
-        val that = o as AttestationStatementSerializationContainer
+        val that = o as SerializedAttestationStatement
         return attestationStatement == that.attestationStatement
     }
 

@@ -11,14 +11,14 @@ class AttestationStatementConverter {
     }
 
     fun convertToString(attribute: AttestationStatement): String {
-        val container = AttestationStatementSerializationContainer(attribute)
+        val container = SerializedAttestationStatement(attribute)
         return Base64UrlUtil.encodeToString(cborConverter.writeValueAsBytes(container))
     }
 
     fun convertToEntityAttribute(rawData: String): AttestationStatement {
         val data = Base64UrlUtil.decode(rawData)
         val container = cborConverter.readValue(
-                data, AttestationStatementSerializationContainer::class.java
+                data, SerializedAttestationStatement::class.java
         )
         return container?.attestationStatement
                 ?: throw IllegalArgumentException("attestationStatement is not found")
