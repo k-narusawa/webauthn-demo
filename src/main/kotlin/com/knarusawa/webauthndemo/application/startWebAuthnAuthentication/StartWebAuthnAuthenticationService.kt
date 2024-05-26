@@ -9,6 +9,7 @@ import com.webauthn4j.data.UserVerificationRequirement
 import com.webauthn4j.data.client.challenge.DefaultChallenge
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.TimeUnit
 
 
 @Service
@@ -24,7 +25,7 @@ class StartWebAuthnAuthenticationService(
 
     val options = PublicKeyCredentialRequestOptions(
       /* challenge =        */ challenge,
-      /* timeout =          */ 60000,
+      /* timeout =          */ TimeUnit.SECONDS.toMillis(webAuthnConfig.timeout),
       /* rpId =             */ webAuthnConfig.rpId,
       /* allowCredentials = */ listOf<PublicKeyCredentialDescriptor>(),
       /* userVerification = */ UserVerificationRequirement.REQUIRED,

@@ -6,6 +6,7 @@ import com.knarusawa.webauthndemo.domain.challenge.ChallengeData
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.webauthn4j.data.AttestationConveyancePreference
 import com.webauthn4j.data.AuthenticatorSelectionCriteria
+import com.webauthn4j.data.AuthenticatorTransport
 import com.webauthn4j.data.PublicKeyCredentialCreationOptions
 import com.webauthn4j.data.PublicKeyCredentialDescriptor
 import com.webauthn4j.data.PublicKeyCredentialParameters
@@ -61,7 +62,7 @@ class StartWebAuthnRegistrationService(
       PublicKeyCredentialDescriptor(
         /* type =       */ PublicKeyCredentialType.PUBLIC_KEY,
         /* id =         */ Base64UrlUtil.decode(it.credentialId),
-        /* transports = */ setOf() // TODO: これでいいっけ？
+        /* transports = */ setOf(AuthenticatorTransport.INTERNAL)
       )
     }
 
@@ -70,7 +71,7 @@ class StartWebAuthnRegistrationService(
       /* user =                   */ user,
       /* challenge =              */ challenge,
       /* pubKeyCredParams =       */ pubKeyCredParams,
-      /* timeout =                */ TimeUnit.SECONDS.toMillis(180000),
+      /* timeout =                */ TimeUnit.SECONDS.toMillis(webAuthnConfig.timeout),
       /* excludeCredentials =     */ excludeCredentials,
       /* authenticatorSelection = */ authenticatorSelectionCriteria,
       /* attestation =            */ AttestationConveyancePreference.DIRECT,

@@ -15,6 +15,7 @@ class WebAuthnConfig {
   var rpId: String? = null
   var origins: List<String> = mutableListOf()
   var name: String? = null
+  var timeout: Long = 60000
 
   fun serverProperty(challenge: DefaultChallenge): ServerProperty {
     val origins = this.origins.map {

@@ -27,3 +27,4 @@ env:
       - http://localhost:3000
       - http://localhost:3001
     name: "WebAuthn Demo"
+    timeout: 10000 # [ms] 10s

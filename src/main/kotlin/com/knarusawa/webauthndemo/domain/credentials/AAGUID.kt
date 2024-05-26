@@ -33,4 +33,8 @@ enum class AAGUID(val aaguid: String, val labael: String) {
       return entries.find { it.aaguid == aaguid } ?: UNKNOWN
     }
   }
+
+  override fun toString(): String {
+    return """AAGUID(aaguid='$aaguid', labael='$labael')"""
+  }
 }

@@ -17,7 +17,6 @@ class LogoutController {
 
   @PostMapping
   fun apiV1LogoutPost(request: HttpServletRequest, response: HttpServletResponse) {
-    log.info("ログアウト処理")
     val authentication = SecurityContextHolder.getContext().authentication
     if (authentication != null) {
       SecurityContextLogoutHandler().logout(request, response, authentication)
