@@ -51,6 +51,7 @@ data class CredentialsRecord(
 ) {
   companion object {
     private val objectConverter = ObjectConverter()
+    private val cborConverter = objectConverter.cborConverter
     private val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
     private val clientOutputsConverter =
       AuthenticationExtensionsClientOutputsConverter(objectConverter)
@@ -70,7 +71,9 @@ data class CredentialsRecord(
       transports = credential.transports.joinToString(",") {
         AuthenticatorTransportConverter().convertToString(it)
       },
-      authenticatorExtensions = credential.authenticatorExtensions,
+      authenticatorExtensions = Base64UrlUtil.encodeToString(
+        cborConverter.writeValueAsBytes(credential.authenticatorExtensions)
+      ),
       clientExtensions = credential.clientExtensions?.let {
         clientOutputsConverter.convertToString(credential.clientExtensions)
       },
