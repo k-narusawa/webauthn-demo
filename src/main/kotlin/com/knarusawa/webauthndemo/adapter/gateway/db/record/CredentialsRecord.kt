@@ -2,6 +2,9 @@ package com.knarusawa.webauthndemo.adapter.gateway.db.record
 
 import com.knarusawa.webauthndemo.domain.credentials.AttestationStatementConverter
 import com.knarusawa.webauthndemo.domain.credentials.Credential
+import com.webauthn4j.converter.AttestedCredentialDataConverter
+import com.webauthn4j.converter.util.ObjectConverter
+import com.webauthn4j.util.Base64UrlUtil
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -45,12 +48,18 @@ data class CredentialsRecord(
   val counter: Long,
 ) {
   companion object {
+    private val objectConverter = ObjectConverter()
+    private val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
     fun from(credential: Credential) = CredentialsRecord(
       credentialId = credential.credentialId,
       userId = credential.userId,
       aaguid = credential.aaguid.aaguid,
       label = credential.label,
-      attestedCredentialData = credential.attestedCredentialData,
+      attestedCredentialData = Base64UrlUtil.encodeToString(
+        attestedCredentialDataConverter.convert(
+          credential.attestedCredentialData
+        )
+      ),
       attestationStatement = AttestationStatementConverter().convertToString(credential.attestationStatement),
       attestationStatementFormat = credential.attestationStatementFormat,
       transports = credential.transports,

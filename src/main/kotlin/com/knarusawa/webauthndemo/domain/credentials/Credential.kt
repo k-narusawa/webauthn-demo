@@ -4,6 +4,7 @@ import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.util.ObjectConverter
+import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData
 import com.webauthn4j.data.attestation.statement.AttestationStatement
 import com.webauthn4j.util.Base64UrlUtil
 
@@ -12,7 +13,7 @@ class Credential private constructor(
   val userId: String,
   val aaguid: AAGUID,
   label: String,
-  val attestedCredentialData: String,
+  val attestedCredentialData: AttestedCredentialData,
   val attestationStatement: AttestationStatement,
   val attestationStatementFormat: String,
   val transports: String,
@@ -27,17 +28,13 @@ class Credential private constructor(
 
   companion object {
     private val objectConverter = ObjectConverter()
+    val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
 
     fun of(
       credentialId: ByteArray?,
       userId: String,
       authenticator: AuthenticatorImpl,
     ): Credential {
-      val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
-
-      val serializedAttestedCredentialData =
-        attestedCredentialDataConverter.convert(authenticator.attestedCredentialData)
-
       val rawAAGUID = authenticator.attestedCredentialData.aaguid.value.toString()
       val aaguid = AAGUID.fromAAGUID(rawAAGUID)
 
@@ -46,7 +43,7 @@ class Credential private constructor(
         userId = userId,
         aaguid = aaguid,
         label = aaguid.labael,
-        attestedCredentialData = Base64UrlUtil.encodeToString(serializedAttestedCredentialData),
+        attestedCredentialData = authenticator.attestedCredentialData,
         attestationStatement = authenticator.attestationStatement ?: throw IllegalArgumentException(
           "attestationStatement is not found"
         ),
@@ -73,7 +70,9 @@ class Credential private constructor(
       userId = record.userId,
       aaguid = AAGUID.fromAAGUID(record.aaguid),
       label = record.label,
-      attestedCredentialData = record.attestedCredentialData,
+      attestedCredentialData = attestedCredentialDataConverter.convert(
+        Base64UrlUtil.decode(record.attestedCredentialData)
+      ),
       attestationStatement = AttestationStatementConverter().convertToEntityAttribute(record.attestationStatement),
       attestationStatementFormat = record.attestationStatementFormat,
       transports = record.transports,

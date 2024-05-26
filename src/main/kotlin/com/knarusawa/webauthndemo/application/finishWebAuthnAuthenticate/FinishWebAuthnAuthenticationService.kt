@@ -44,25 +44,21 @@ class FinishWebAuthnAuthenticationService(
 
     val serverProperty = webAuthnConfig.serverProperty(challenge)
 
-    val credentials = credentialRepository.findByCredentialId(inputData.credentialId)
+    val credential = credentialRepository.findByCredentialId(inputData.credentialId)
       ?: throw IllegalArgumentException("credential is not found")
 
-    log.info(credentials.toString())
-
-    val attestedCredentialData = attestedCredentialDataConverter.convert(
-      Base64UrlUtil.decode(credentials.attestedCredentialData)
-    )
+    log.info(credential.toString())
 
     val authenticator = AuthenticatorImpl(
-      /* attestedCredentialData = */ attestedCredentialData,
-      /* attestationStatement   = */ null,
-      /* counter                = */ credentials.counter
+      /* attestedCredentialData = */ credential.attestedCredentialData,
+      /* attestationStatement   = */ credential.attestationStatement,
+      /* counter                = */ credential.counter
     )
 
     val authenticationParameter = AuthenticationParameters(
       serverProperty,
       authenticator,
-      listOf(Base64UrlUtil.decode(credentials.credentialId)),
+      listOf(Base64UrlUtil.decode(credential.credentialId)),
       false
     )
 
@@ -88,8 +84,8 @@ class FinishWebAuthnAuthenticationService(
       throw ex
     }
 
-    credentials.updateCounter(authenticationData.authenticatorData!!.signCount)
-    credentialRepository.save(credentials)
+    credential.updateCounter(authenticationData.authenticatorData!!.signCount)
+    credentialRepository.save(credential)
     challengeDataRepository.deleteByChallenge(inputData.challenge)
 
     return FinishWebAuthnAuthenticationOutputData(userId = UserId.from(userId))
