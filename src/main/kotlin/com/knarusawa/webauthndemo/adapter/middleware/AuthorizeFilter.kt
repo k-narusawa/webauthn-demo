@@ -39,7 +39,6 @@ class AuthorizeFilter : OncePerRequestFilter() {
         return
       }
 
-      log.debug("Authorized user_id: ${user.userId}")
       SecurityContextHolder.getContext().authentication =
         UsernamePasswordAuthenticationToken(user, null, ArrayList())
     }

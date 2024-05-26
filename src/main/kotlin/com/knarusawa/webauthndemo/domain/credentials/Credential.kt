@@ -91,8 +91,7 @@ class Credential private constructor(
   }
 
   override fun toString(): String {
-    return """
-      Credential(
+    return """Credential(
       credentialId='$credentialId', 
       userId='$userId', 
       aaguid='$aaguid',

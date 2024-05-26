@@ -16,11 +16,7 @@ spring:
       settings:
         trace: false
         web-allow-others: false
-  logging:
-    level:
-      org:
-        springframework:
-          security: DEBUG
+
 logging:
   config: classpath:logback/logback-spring.xml
 
