@@ -3,6 +3,7 @@ package com.knarusawa.webauthndemo.adapter.gateway.db.record
 import com.knarusawa.webauthndemo.domain.credentials.AttestationStatementConverter
 import com.knarusawa.webauthndemo.domain.credentials.Credential
 import com.webauthn4j.converter.AttestedCredentialDataConverter
+import com.webauthn4j.converter.AuthenticatorTransportConverter
 import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.util.Base64UrlUtil
 import jakarta.persistence.Column
@@ -62,7 +63,9 @@ data class CredentialsRecord(
       ),
       attestationStatement = AttestationStatementConverter().convertToString(credential.attestationStatement),
       attestationStatementFormat = credential.attestationStatementFormat,
-      transports = credential.transports,
+      transports = credential.transports.joinToString(",") {
+        AuthenticatorTransportConverter().convertToString(it)
+      },
       authenticatorExtensions = credential.authenticatorExtensions,
       clientExtensions = credential.clientExtensions,
       counter = credential.counter,

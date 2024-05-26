@@ -3,7 +3,9 @@ package com.knarusawa.webauthndemo.domain.credentials
 import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
+import com.webauthn4j.converter.AuthenticatorTransportConverter
 import com.webauthn4j.converter.util.ObjectConverter
+import com.webauthn4j.data.AuthenticatorTransport
 import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData
 import com.webauthn4j.data.attestation.statement.AttestationStatement
 import com.webauthn4j.util.Base64UrlUtil
@@ -16,7 +18,7 @@ class Credential private constructor(
   val attestedCredentialData: AttestedCredentialData,
   val attestationStatement: AttestationStatement,
   val attestationStatementFormat: String,
-  val transports: String,
+  val transports: Set<AuthenticatorTransport>,
   val authenticatorExtensions: String,
   val clientExtensions: String,
   counter: Long,
@@ -28,7 +30,8 @@ class Credential private constructor(
 
   companion object {
     private val objectConverter = ObjectConverter()
-    val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
+    private val attestedCredentialDataConverter = AttestedCredentialDataConverter(objectConverter)
+    private val transportConverter = AuthenticatorTransportConverter()
 
     fun of(
       credentialId: ByteArray?,
@@ -44,15 +47,10 @@ class Credential private constructor(
         aaguid = aaguid,
         label = aaguid.labael,
         attestedCredentialData = authenticator.attestedCredentialData,
-        attestationStatement = authenticator.attestationStatement ?: throw IllegalArgumentException(
-          "attestationStatement is not found"
-        ),
+        attestationStatement = authenticator.attestationStatement
+          ?: throw IllegalArgumentException("attestationStatement is not found"),
         attestationStatementFormat = authenticator.attestationStatement!!.format,
-        transports = authenticator.transports?.let {
-          objectConverter.jsonConverter.writeValueAsString(
-            it
-          )
-        } ?: "[]",
+        transports = authenticator.transports ?: emptySet(),
         authenticatorExtensions = Base64UrlUtil.encodeToString(
           objectConverter.cborConverter.writeValueAsBytes(
             authenticator.authenticatorExtensions
@@ -75,7 +73,9 @@ class Credential private constructor(
       ),
       attestationStatement = AttestationStatementConverter().convertToEntityAttribute(record.attestationStatement),
       attestationStatementFormat = record.attestationStatementFormat,
-      transports = record.transports,
+      transports = record.transports.split(",").map {
+        transportConverter.convert(it)
+      }.toSet(),
       authenticatorExtensions = record.authenticatorExtensions,
       clientExtensions = record.clientExtensions,
       counter = record.counter,
