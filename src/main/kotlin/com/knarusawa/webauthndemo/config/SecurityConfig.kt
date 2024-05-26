@@ -20,77 +20,77 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 class SecurityConfig {
-  @Autowired
-  private lateinit var authenticationConfiguration: AuthenticationConfiguration
+    @Autowired
+    private lateinit var authenticationConfiguration: AuthenticationConfiguration
 
-  @Autowired
-  private lateinit var authenticationSuccessHandler: AuthenticationSuccessHandler
+    @Autowired
+    private lateinit var authenticationSuccessHandler: AuthenticationSuccessHandler
 
-  @Autowired
-  private lateinit var authenticationFailureHandler: AuthenticationFailureHandler
+    @Autowired
+    private lateinit var authenticationFailureHandler: AuthenticationFailureHandler
 
-  @Autowired
-  private lateinit var authorizeFilter: AuthorizeFilter
+    @Autowired
+    private lateinit var authorizeFilter: AuthorizeFilter
 
-  @Bean
-  fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-    http.cors {
-      it.configurationSource(corsConfigurationSource())
+    @Bean
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http.cors {
+            it.configurationSource(corsConfigurationSource())
+        }
+        http.csrf {
+            // デモなのでcsrfは無効化
+            // 実際に使う場合はcsrf用のエンドポイントを作成
+            it.disable()
+        }
+        http.authorizeHttpRequests {
+            it.requestMatchers("/v1/login").permitAll()
+            it.requestMatchers("/v1/webauthn/authentication/options").permitAll()
+            it.requestMatchers("/v1/logout").permitAll()
+            it.requestMatchers("/h2-console/**").permitAll()
+            it.anyRequest().authenticated()
+        }
+        http.headers {
+            it.frameOptions { it.disable() }
+        }
+        http.addFilterBefore(authorizeFilter, UsernamePasswordAuthenticationFilter::class.java)
+        http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
+        return http.build()
     }
-    http.csrf {
-      // デモなのでcsrfは無効化
-      // 実際に使う場合はcsrf用のエンドポイントを作成
-      it.disable()
+
+    fun authenticationFilter(): UsernamePasswordAuthenticationFilter {
+        val filter = AuthenticationFilter(authenticationManager())
+        filter.setRequiresAuthenticationRequestMatcher {
+            (it.method == "POST" && it.requestURI == "/v1/login") or
+                    (it.method == "POST" && it.requestURI == "/v1/webauthn/authentication")
+        }
+        filter.setAuthenticationManager(authenticationManager())
+        filter.setAuthenticationSuccessHandler(authenticationSuccessHandler)
+        filter.setAuthenticationFailureHandler(authenticationFailureHandler)
+        return filter
     }
-    http.authorizeHttpRequests {
-      it.requestMatchers("/v1/login").permitAll()
-      it.requestMatchers("/v1/webauthn/authentication/options").permitAll()
-      it.requestMatchers("/v1/logout").permitAll()
-      it.requestMatchers("/h2-console/**").permitAll()
-      it.anyRequest().authenticated()
+
+
+    @Bean
+    fun passwordEncoder(): PasswordEncoder {
+        return BCryptPasswordEncoder()
     }
-    http.headers {
-      it.frameOptions { it.disable() }
+
+    @Bean
+    fun authenticationManager(): AuthenticationManager {
+        return authenticationConfiguration.authenticationManager
     }
-    http.addFilterBefore(authorizeFilter, UsernamePasswordAuthenticationFilter::class.java)
-    http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
-    return http.build()
-  }
 
-  fun authenticationFilter(): UsernamePasswordAuthenticationFilter {
-    val filter = AuthenticationFilter(authenticationManager())
-    filter.setRequiresAuthenticationRequestMatcher {
-      (it.method == "POST" && it.requestURI == "/v1/login") or
-          (it.method == "POST" && it.requestURI == "/v1/webauthn/authentication")
+    private fun corsConfigurationSource(): CorsConfigurationSource {
+        val config = CorsConfiguration()
+        config.addAllowedMethod(CorsConfiguration.ALL)
+        config.addAllowedHeader(CorsConfiguration.ALL)
+        config.allowCredentials = true
+
+        config.addAllowedOrigin("http://127.0.0.1:3000")
+        config.addAllowedOrigin("http://localhost:3000")
+
+        val corsSource = UrlBasedCorsConfigurationSource()
+        corsSource.registerCorsConfiguration("/**", config)
+        return corsSource
     }
-    filter.setAuthenticationManager(authenticationManager())
-    filter.setAuthenticationSuccessHandler(authenticationSuccessHandler)
-    filter.setAuthenticationFailureHandler(authenticationFailureHandler)
-    return filter
-  }
-
-
-  @Bean
-  fun passwordEncoder(): PasswordEncoder {
-    return BCryptPasswordEncoder()
-  }
-
-  @Bean
-  fun authenticationManager(): AuthenticationManager {
-    return authenticationConfiguration.authenticationManager
-  }
-
-  private fun corsConfigurationSource(): CorsConfigurationSource {
-    val config = CorsConfiguration()
-    config.addAllowedMethod(CorsConfiguration.ALL)
-    config.addAllowedHeader(CorsConfiguration.ALL)
-    config.allowCredentials = true
-
-    config.addAllowedOrigin("http://127.0.0.1:3000")
-    config.addAllowedOrigin("http://localhost:3000")
-
-    val corsSource = UrlBasedCorsConfigurationSource()
-    corsSource.registerCorsConfiguration("/**", config)
-    return corsSource
-  }
 }

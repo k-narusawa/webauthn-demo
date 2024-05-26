@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class Environments {
-  @Value("$\\{env.webauthn.rp-id\\}")
-  private lateinit var rpId: String
+    @Value("$\\{env.webauthn.rp-id\\}")
+    private lateinit var rpId: String
 
-  @Value("$\\{env.webauthn.origins\\}")
-  private lateinit var origins: String
+    @Value("$\\{env.webauthn.origins\\}")
+    private lateinit var origins: String
 }

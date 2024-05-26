@@ -12,28 +12,28 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ConfigurationProperties(prefix = "env.webauthn")
 class WebAuthnConfig {
-  var rpId: String? = null
-  var origins: List<String> = mutableListOf()
-  var name: String? = null
-  var timeout: Long = 60000
+    var rpId: String? = null
+    var origins: List<String> = mutableListOf()
+    var name: String? = null
+    var timeout: Long = 60000
 
-  fun serverProperty(challenge: DefaultChallenge): ServerProperty {
-    val origins = this.origins.map {
-      Origin.create(it)
-    }.toSet()
-    val rpId = this.rpId ?: throw RuntimeException("rpIdが設定されていません")
+    fun serverProperty(challenge: DefaultChallenge): ServerProperty {
+        val origins = this.origins.map {
+            Origin.create(it)
+        }.toSet()
+        val rpId = this.rpId ?: throw RuntimeException("rpIdが設定されていません")
 
-    return ServerProperty(origins, rpId, challenge, null)
-  }
+        return ServerProperty(origins, rpId, challenge, null)
+    }
 
-  fun publicKeyCredentialRpEntity(): PublicKeyCredentialRpEntity {
-    val name = this.name ?: throw RuntimeException("nameが設定されていません")
+    fun publicKeyCredentialRpEntity(): PublicKeyCredentialRpEntity {
+        val name = this.name ?: throw RuntimeException("nameが設定されていません")
 
-    return PublicKeyCredentialRpEntity(rpId, name)
-  }
+        return PublicKeyCredentialRpEntity(rpId, name)
+    }
 
-  @Bean
-  fun WebAuthnManager(): WebAuthnManager {
-    return WebAuthnManager.createNonStrictWebAuthnManager()
-  }
+    @Bean
+    fun WebAuthnManager(): WebAuthnManager {
+        return WebAuthnManager.createNonStrictWebAuthnManager()
+    }
 }

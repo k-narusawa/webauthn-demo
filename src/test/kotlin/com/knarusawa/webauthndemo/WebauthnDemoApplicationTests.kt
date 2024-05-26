@@ -6,8 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 class WebauthnDemoApplicationTests {
 
-  @Test
-  fun contextLoads() {
-  }
+    @Test
+    fun contextLoads() {
+    }
 
 }

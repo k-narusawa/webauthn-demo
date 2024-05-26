@@ -9,20 +9,20 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationSuccessHandler() :
-  org.springframework.security.web.authentication.AuthenticationSuccessHandler {
-  private val log = logger()
+        org.springframework.security.web.authentication.AuthenticationSuccessHandler {
+    private val log = logger()
 
-  override fun onAuthenticationSuccess(
-    request: HttpServletRequest?,
-    response: HttpServletResponse?,
-    authentication: Authentication?
-  ) {
-    log.info("onAuthenticationSuccess")
+    override fun onAuthenticationSuccess(
+            request: HttpServletRequest?,
+            response: HttpServletResponse?,
+            authentication: Authentication?
+    ) {
+        log.info("onAuthenticationSuccess")
 
-    val user = authentication?.principal as LoginUserDetails
+        val user = authentication?.principal as LoginUserDetails
 
-    val session = request?.session
-    session?.setAttribute("user", user)
-    response?.status = HttpServletResponse.SC_OK
-  }
+        val session = request?.session
+        session?.setAttribute("user", user)
+        response?.status = HttpServletResponse.SC_OK
+    }
 }

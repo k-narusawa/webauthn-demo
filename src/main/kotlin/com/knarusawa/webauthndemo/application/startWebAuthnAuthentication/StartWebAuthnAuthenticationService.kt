@@ -14,28 +14,28 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class StartWebAuthnAuthenticationService(
-  private val webAuthnConfig: WebAuthnConfig,
-  private val challengeDataRepository: ChallengeDataRepository,
+        private val webAuthnConfig: WebAuthnConfig,
+        private val challengeDataRepository: ChallengeDataRepository,
 ) {
-  @Transactional
-  fun exec(): StartWebAuthnAuthenticationOutputData {
-    val challenge = DefaultChallenge()
+    @Transactional
+    fun exec(): StartWebAuthnAuthenticationOutputData {
+        val challenge = DefaultChallenge()
 
-    val challengeData = ChallengeData.of(challenge = challenge)
+        val challengeData = ChallengeData.of(challenge = challenge)
 
-    val options = PublicKeyCredentialRequestOptions(
-      /* challenge =        */ challenge,
-      /* timeout =          */ TimeUnit.SECONDS.toMillis(webAuthnConfig.timeout),
-      /* rpId =             */ webAuthnConfig.rpId,
-      /* allowCredentials = */ listOf<PublicKeyCredentialDescriptor>(),
-      /* userVerification = */ UserVerificationRequirement.REQUIRED,
-      /* extensions =       */ null
-    )
-    challengeDataRepository.save(challengeData)
+        val options = PublicKeyCredentialRequestOptions(
+                /* challenge =        */ challenge,
+                /* timeout =          */ TimeUnit.SECONDS.toMillis(webAuthnConfig.timeout),
+                /* rpId =             */ webAuthnConfig.rpId,
+                /* allowCredentials = */ listOf<PublicKeyCredentialDescriptor>(),
+                /* userVerification = */ UserVerificationRequirement.REQUIRED,
+                /* extensions =       */ null
+        )
+        challengeDataRepository.save(challengeData)
 
-    return StartWebAuthnAuthenticationOutputData(
-      challenge = challengeData.challenge,
-      options = options
-    )
-  }
+        return StartWebAuthnAuthenticationOutputData(
+                challenge = challengeData.challenge,
+                options = options
+        )
+    }
 }

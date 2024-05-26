@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/v1/logout")
 class LogoutController {
-  private val log = logger()
+    private val log = logger()
 
-  @PostMapping
-  fun apiV1LogoutPost(request: HttpServletRequest, response: HttpServletResponse) {
-    val authentication = SecurityContextHolder.getContext().authentication
-    if (authentication != null) {
-      SecurityContextLogoutHandler().logout(request, response, authentication)
+    @PostMapping
+    fun apiV1LogoutPost(request: HttpServletRequest, response: HttpServletResponse) {
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication != null) {
+            SecurityContextLogoutHandler().logout(request, response, authentication)
+        }
     }
-  }
 }

@@ -9,18 +9,18 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional(readOnly = true)
 class WebAuthnCredentialDtoQueryServiceImpl(
-  private val credentialsDao: CredentialsDao
+        private val credentialsDao: CredentialsDao
 ) : WebAuthnCredentialDtoQueryService {
-  override fun findByUserId(userId: String): List<WebAuthnCredentialDto> {
-    val record = credentialsDao.findByUserId(userId)
-    return record.map {
-      WebAuthnCredentialDto(
-        credentialId = it.credentialId,
-        userId = it.userId,
-        aaguid = it.aaguid,
-        label = it.label,
-        counter = it.counter
-      )
+    override fun findByUserId(userId: String): List<WebAuthnCredentialDto> {
+        val record = credentialsDao.findByUserId(userId)
+        return record.map {
+            WebAuthnCredentialDto(
+                    credentialId = it.credentialId,
+                    userId = it.userId,
+                    aaguid = it.aaguid,
+                    label = it.label,
+                    counter = it.counter
+            )
+        }
     }
-  }
 }
