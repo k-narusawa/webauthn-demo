@@ -3,11 +3,14 @@ package com.knarusawa.webauthndemo.domain.credentials
 import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
 import com.knarusawa.webauthndemo.domain.credentials.converter.AttestationStatementConverter
 import com.knarusawa.webauthndemo.domain.credentials.converter.AuthenticatorExtensionsConverter
+import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
 import com.webauthn4j.converter.AuthenticationExtensionsClientOutputsConverter
 import com.webauthn4j.converter.AuthenticatorTransportConverter
 import com.webauthn4j.converter.util.ObjectConverter
+import com.webauthn4j.data.AuthenticationParameters
+import com.webauthn4j.data.AuthenticationRequest
 import com.webauthn4j.data.AuthenticatorTransport
 import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData
 import com.webauthn4j.data.attestation.statement.AttestationStatement
@@ -16,6 +19,7 @@ import com.webauthn4j.data.extension.authenticator.RegistrationExtensionAuthenti
 import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientOutputs
 import com.webauthn4j.data.extension.client.RegistrationExtensionClientOutput
 import com.webauthn4j.util.Base64UrlUtil
+import com.webauthn4j.util.exception.WebAuthnException
 import java.time.LocalDateTime
 
 class Credential private constructor(
@@ -102,8 +106,28 @@ class Credential private constructor(
     this.label = label
   }
 
-  fun updateCounter(counter: Long) {
-    this.counter = counter
+  fun isValid(
+    webAuthnManager: WebAuthnManager,
+    authenticationRequest: AuthenticationRequest,
+    authenticationParameter: AuthenticationParameters
+  ): Boolean {
+    val authenticationData = webAuthnManager.parse(authenticationRequest)
+
+    try {
+      webAuthnManager.validate(authenticationRequest, authenticationParameter)
+    } catch (ex: WebAuthnException) {
+      ex.printStackTrace()
+      return false
+    }
+
+    if (authenticationData.authenticatorData?.signCount != this.counter) {
+      return false
+    }
+
+    this.counter = authenticationData.authenticatorData!!.signCount
+    this.lastUsedAt = LocalDateTime.now()
+
+    return true
   }
 
   fun getAuthenticator(): AuthenticatorImpl {

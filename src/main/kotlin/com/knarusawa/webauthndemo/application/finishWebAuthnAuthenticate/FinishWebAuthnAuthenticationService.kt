@@ -6,7 +6,6 @@ import com.knarusawa.webauthndemo.domain.credentials.CredentialRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
 import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
-import com.webauthn4j.converter.exception.DataConversionException
 import com.webauthn4j.data.AuthenticationParameters
 import com.webauthn4j.data.AuthenticationRequest
 import com.webauthn4j.util.Base64UrlUtil
@@ -34,16 +33,13 @@ class FinishWebAuthnAuthenticationService(
     val challengeData = challengeDataRepository.findByChallenge(inputData.challenge)
       ?: throw IllegalArgumentException("flow is not found")
 
-
-    val serverProperty = webAuthnConfig.serverProperty(challengeData.challenge)
-
     val credential = credentialRepository.findByCredentialId(inputData.credentialId)
       ?: throw IllegalArgumentException("credential is not found")
 
     val authenticator = credential.getAuthenticator()
 
     val authenticationParameter = AuthenticationParameters(
-      /* serverProperty =           */ serverProperty,
+      /* serverProperty =           */ webAuthnConfig.serverProperty(challengeData.challenge),
       /* authenticator =            */ authenticator,
       /* allowCredentials =         */ listOf(Base64UrlUtil.decode(credential.credentialId)),
       /* userVerificationRequired = */ true
@@ -57,21 +53,16 @@ class FinishWebAuthnAuthenticationService(
       /* signature =         */ Base64UrlUtil.decode(inputData.signature),
     )
 
-    val authenticationData = try {
-      webAuthnManager.parse(authenticationRequest);
-    } catch (ex: DataConversionException) {
-      ex.printStackTrace()
-      throw ex
+    val result = credential.isValid(
+      webAuthnManager = webAuthnManager,
+      authenticationRequest = authenticationRequest,
+      authenticationParameter = authenticationParameter
+    )
+
+    if (!result) {
+      throw WebAuthnException("Credential is not valid.")
     }
 
-    try {
-      webAuthnManager.validate(authenticationRequest, authenticationParameter)
-    } catch (ex: WebAuthnException) {
-      ex.printStackTrace()
-      throw ex
-    }
-
-    credential.updateCounter(authenticationData.authenticatorData!!.signCount)
     credentialRepository.save(credential)
     challengeDataRepository.deleteByChallenge(inputData.challenge)
 
