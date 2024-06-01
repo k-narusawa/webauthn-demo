@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ProfileCard from "@/components/pages/top/ProfileCard";
 import { Button } from "@/components/commons/Button";
 import { PasskeyCard } from "@/components/pages/top/PasskeyCard";
+import Cookies from 'js-cookie';
 
 const HomePage = () => {
   const [userinfo, setUserInfo] = useState<any>();
@@ -24,10 +25,16 @@ const HomePage = () => {
         withCredentials: true,
       })
         .then((response) => {
-          setUserInfo(response.data);
+          if(response.status ){
+            setUserInfo(response.data);
+          } else {
+            router.push("/login");
+          }
         })
         .catch((error) => {
           console.log(error.response.data); 
+          // cookieを削除してログイン画面に遷移
+          Cookies.remove('JSESSIONID')
           router.push("/login");
         });
     };
@@ -60,14 +67,11 @@ const HomePage = () => {
     await axios(`${apiHost}/v1/logout`, {
       method: "POST",
       withCredentials: true,
-    })
-      .then(() => {
-        router.push("/login");
-      })
-      .catch((error) => {
-        console.log(error.response.data);
-        toast.error("Failed to logout");
-      });
+    }).catch((error) => {
+      console.log(error.response.data);
+    });
+    Cookies.remove('JSESSIONID')
+    router.push("/login");
   };
 
   return (

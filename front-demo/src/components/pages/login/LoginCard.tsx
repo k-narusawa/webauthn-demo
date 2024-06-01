@@ -2,12 +2,12 @@ import { Button } from "@/components/commons/Button";
 import { Card } from "@/components/commons/Card";
 import { FormEventHandler } from "react";
 
-type LoginFormProps = {
+type LoginCardProps = {
   handleLogin: FormEventHandler<HTMLFormElement>;
   handleWebAuthnLogin: FormEventHandler<HTMLFormElement>;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({
+const LoginCard: React.FC<LoginCardProps> = ({
   handleLogin,
   handleWebAuthnLogin,
 }) => {
@@ -77,4 +77,4 @@ const LoginForm: React.FC<LoginFormProps> = ({
   );
 };
 
-export default LoginForm;
+export default LoginCard;

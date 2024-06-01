@@ -1,4 +1,4 @@
-import LoginForm from "@/components/pages/login/LoginForm";
+import LoginCard from "@/components/pages/login/LoginCard";
 import { useWebAuthn } from "@/hooks/userWebAuthn";
 import axios from "axios";
 import { useRouter } from "next/router";
@@ -76,7 +76,7 @@ const LoginPage = () => {
     <>
       <div className="pt-10">
         <ToastContainer />
-        <LoginForm
+        <LoginCard
           handleLogin={handleLogin}
           handleWebAuthnLogin={handleWebAuthnLogin}
         />
