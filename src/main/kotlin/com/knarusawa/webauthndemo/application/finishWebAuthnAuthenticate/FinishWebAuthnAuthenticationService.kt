@@ -43,18 +43,18 @@ class FinishWebAuthnAuthenticationService(
     val authenticator = credential.getAuthenticator()
 
     val authenticationParameter = AuthenticationParameters(
-      serverProperty,
-      authenticator,
-      listOf(Base64UrlUtil.decode(credential.credentialId)),
-      true
+      /* serverProperty =           */ serverProperty,
+      /* authenticator =            */ authenticator,
+      /* allowCredentials =         */ listOf(Base64UrlUtil.decode(credential.credentialId)),
+      /* userVerificationRequired = */ true
     )
 
     val authenticationRequest = AuthenticationRequest(
-      /* credentialId = */      Base64UrlUtil.decode(inputData.credentialId),
-      /* userHandle = */        inputData.userHandle.let { Base64UrlUtil.decode(it) },
+      /* credentialId =      */ Base64UrlUtil.decode(inputData.credentialId),
+      /* userHandle =        */ inputData.userHandle.let { Base64UrlUtil.decode(it) },
       /* authenticatorData = */ Base64UrlUtil.decode(inputData.authenticatorData),
-      /* clientDataJSON = */    Base64UrlUtil.decode(inputData.clientDataJSON),
-      /* signature = */         Base64UrlUtil.decode(inputData.signature),
+      /* clientDataJSON =    */ Base64UrlUtil.decode(inputData.clientDataJSON),
+      /* signature =         */ Base64UrlUtil.decode(inputData.signature),
     )
 
     val authenticationData = try {
