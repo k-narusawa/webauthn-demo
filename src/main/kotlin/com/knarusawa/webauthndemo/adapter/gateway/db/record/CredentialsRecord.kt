@@ -11,6 +11,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "credentials")
@@ -48,6 +49,12 @@ data class CredentialsRecord(
 
   @Column(name = "counter")
   val counter: Long,
+
+  @Column(name = "registered_at")
+  val registeredAt: LocalDateTime,
+
+  @Column(name = "last_used_at")
+  val lastUsedAt: LocalDateTime?,
 ) {
   companion object {
     private val objectConverter = ObjectConverter()
@@ -78,6 +85,8 @@ data class CredentialsRecord(
         clientOutputsConverter.convertToString(credential.clientExtensions)
       },
       counter = credential.counter,
+      registeredAt = credential.registeredAt,
+      lastUsedAt = credential.lastUsedAt,
     )
   }
 }

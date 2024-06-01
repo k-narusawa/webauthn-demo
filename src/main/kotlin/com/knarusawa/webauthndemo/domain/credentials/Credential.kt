@@ -16,6 +16,7 @@ import com.webauthn4j.data.extension.authenticator.RegistrationExtensionAuthenti
 import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientOutputs
 import com.webauthn4j.data.extension.client.RegistrationExtensionClientOutput
 import com.webauthn4j.util.Base64UrlUtil
+import java.time.LocalDateTime
 
 class Credential private constructor(
   val credentialId: String,
@@ -29,10 +30,14 @@ class Credential private constructor(
   val authenticatorExtensions: AuthenticationExtensionsAuthenticatorOutputs<RegistrationExtensionAuthenticatorOutput>?,
   val clientExtensions: AuthenticationExtensionsClientOutputs<RegistrationExtensionClientOutput>?,
   counter: Long,
+  val registeredAt: LocalDateTime,
+  lastUsedAt: LocalDateTime?,
 ) {
   var label: String = label
     private set
   var counter: Long = counter
+    private set
+  var lastUsedAt: LocalDateTime? = lastUsedAt
     private set
 
   companion object {
@@ -63,6 +68,8 @@ class Credential private constructor(
         authenticatorExtensions = authenticator.authenticatorExtensions,
         clientExtensions = authenticator.clientExtensions,
         counter = authenticator.counter,
+        registeredAt = LocalDateTime.now(),
+        lastUsedAt = null,
       )
     }
 
@@ -86,6 +93,8 @@ class Credential private constructor(
         clientOutputsConverter.convert(record.clientExtensions)
       },
       counter = record.counter,
+      registeredAt = record.registeredAt,
+      lastUsedAt = record.lastUsedAt,
     )
   }
 
@@ -109,7 +118,9 @@ class Credential private constructor(
       transports=$transports, 
       authenticatorExtensions='$authenticatorExtensions', 
       clientExtensions='$clientExtensions', 
-      counter=$counter
+      counter=$counter,
+      registeredAt=$registeredAt,
+      lastUsedAt=$lastUsedAt
     )
     """.trimIndent()
   }

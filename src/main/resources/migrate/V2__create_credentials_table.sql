@@ -11,6 +11,8 @@ CREATE TABLE credentials
     authenticator_extensions     VARCHAR(255)             NOT NULL,
     client_extensions            VARCHAR(255),
     counter                      INT                      NOT NULL,
+    registered_at                DATETIME                 NOT NULL,
+    last_used_at                 DATETIME,
     created_at                   DATETIME                 NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                   DATETIME                 NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
