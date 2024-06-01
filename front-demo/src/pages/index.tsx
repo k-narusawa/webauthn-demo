@@ -31,8 +31,7 @@ const HomePage = () => {
             router.push("/login");
           }
         })
-        .catch((error) => {
-          console.log(error.response.data); 
+        .catch(() => {
           // cookieを削除してログイン画面に遷移
           Cookies.remove('JSESSIONID')
           router.push("/login");
@@ -44,11 +43,11 @@ const HomePage = () => {
         withCredentials: true,
       })
         .then((response) => {
-          console.log(response.data);
           setKeys(response.data);
         })
         .catch((error) => {
-          console.log(error.response.data);
+          toast.error("Failed to fetch user credentials");
+          return null;
         });
     };
 
@@ -77,7 +76,18 @@ const HomePage = () => {
   return (
     <>
       <div className="pt-10 px-10">
-        <ToastContainer />
+        <ToastContainer 
+          position="bottom-center" 
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <ProfileCard username={userinfo?.username} />
 
         <div className="pt-10"/>
