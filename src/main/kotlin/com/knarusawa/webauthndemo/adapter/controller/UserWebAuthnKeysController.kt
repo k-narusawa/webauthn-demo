@@ -11,26 +11,26 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/v1/users/webauthn/keys")
 class UserWebAuthnKeysController(
-        private val webAuthnCredentialDtoQueryService: WebAuthnCredentialDtoQueryService
+  private val webAuthnCredentialDtoQueryService: WebAuthnCredentialDtoQueryService
 ) {
-    @GetMapping
-    fun v1UsersWebAuthnKeys(): ApiV1UsersCredentialsGet {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val user = authentication.principal as? LoginUserDetails
-                ?: throw IllegalStateException("Principalが不正")
+  @GetMapping
+  fun v1UsersWebAuthnKeys(): ApiV1UsersCredentialsGet {
+    val authentication = SecurityContextHolder.getContext().authentication
+    val user = authentication.principal as? LoginUserDetails
+      ?: throw IllegalStateException("Principalが不正")
 
-        val dto = webAuthnCredentialDtoQueryService.findByUserId(user.userId)
+    val dto = webAuthnCredentialDtoQueryService.findByUserId(user.userId)
 
-        return ApiV1UsersCredentialsGet(
-                dto.map {
-                    ApiV1UsersCredentialsGet.Key(
-                            credentialId = it.credentialId,
-                            userId = it.userId,
-                            aaguid = it.aaguid,
-                            label = it.label
-                    )
-                }
+    return ApiV1UsersCredentialsGet(
+      dto.map {
+        ApiV1UsersCredentialsGet.Key(
+          credentialId = it.credentialId,
+          userId = it.userId,
+          aaguid = it.aaguid,
+          label = it.label
         )
+      }
+    )
 
-    }
+  }
 }

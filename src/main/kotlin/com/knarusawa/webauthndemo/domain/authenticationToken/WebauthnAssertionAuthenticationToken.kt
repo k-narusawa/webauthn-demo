@@ -4,15 +4,15 @@ import com.knarusawa.webauthndemo.application.finishWebAuthnAuthenticate.FinishW
 import org.springframework.security.authentication.AbstractAuthenticationToken
 
 class WebauthnAssertionAuthenticationToken(
-        val principal: String,
-        val credentials: FinishWebAuthnAuthenticationInputData,
+  val principal: String,
+  val credentials: FinishWebAuthnAuthenticationInputData,
 ) : AbstractAuthenticationToken(listOf()) {
 
-    override fun getPrincipal(): Any {
-        return this.principal
-    }
+  override fun getPrincipal(): Any {
+    return this.principal
+  }
 
-    override fun getCredentials(): Any {
-        return this.credentials
-    }
+  override fun getCredentials(): Any {
+    return this.credentials
+  }
 }

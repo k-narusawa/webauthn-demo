@@ -14,34 +14,34 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationProvider(
-        private val userRepository: UserRepository,
-        private val loginUserDetailsService: LoginUserDetailsService,
-        private val passwordEncoder: PasswordEncoder,
-        private val finishWebauthnAuthenticationService: FinishWebAuthnAuthenticationService,
+  private val userRepository: UserRepository,
+  private val loginUserDetailsService: LoginUserDetailsService,
+  private val passwordEncoder: PasswordEncoder,
+  private val finishWebauthnAuthenticationService: FinishWebAuthnAuthenticationService,
 ) : org.springframework.security.authentication.AuthenticationProvider {
-    override fun supports(authentication: Class<*>?): Boolean {
-        return AbstractAuthenticationToken::class.java.isAssignableFrom(authentication)
+  override fun supports(authentication: Class<*>?): Boolean {
+    return AbstractAuthenticationToken::class.java.isAssignableFrom(authentication)
+  }
+
+  override fun authenticate(authentication: Authentication): Authentication {
+    if (authentication is WebauthnAssertionAuthenticationToken) {
+      val outputData = finishWebauthnAuthenticationService.exec(authentication.credentials)
+
+      val user = userRepository.findByUserId(userId = outputData.userId)
+      val loginUser = LoginUserDetails(user!!)
+
+      return UsernamePasswordAuthenticationToken(loginUser, null)
     }
 
-    override fun authenticate(authentication: Authentication): Authentication {
-        if (authentication is WebauthnAssertionAuthenticationToken) {
-            val outputData = finishWebauthnAuthenticationService.exec(authentication.credentials)
+    val username = authentication.principal as String
+    val password = authentication.credentials as String
 
-            val user = userRepository.findByUserId(userId = outputData.userId)
-            val loginUser = LoginUserDetails(user!!)
+    val user = loginUserDetailsService.loadUserByUsername(username)
 
-            return UsernamePasswordAuthenticationToken(loginUser, null)
-        }
-
-        val username = authentication.principal as String
-        val password = authentication.credentials as String
-
-        val user = loginUserDetailsService.loadUserByUsername(username)
-
-        if (!passwordEncoder.matches(password, user.password)) {
-            throw PasswordNotMatchException("パスワードが一致しませんでした")
-        }
-
-        return UsernamePasswordAuthenticationToken(user, password)
+    if (!passwordEncoder.matches(password, user.password)) {
+      throw PasswordNotMatchException("パスワードが一致しませんでした")
     }
+
+    return UsernamePasswordAuthenticationToken(user, password)
+  }
 }
