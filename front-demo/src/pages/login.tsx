@@ -45,12 +45,10 @@ const LoginPage = () => {
         },
         withCredentials: true,
       })
-      .then(function (response) {
-        console.log(response.data);
+      .then(() => {
         router.push("/");
       })
-      .catch(function (error) {
-        console.log(error.response.data);
+      .catch(() => {
         toast.error("Invalid username or password");
       });
   };
@@ -61,10 +59,10 @@ const LoginPage = () => {
     const options = await axios(`${apiHost}/v1/webauthn/authentication/options`, {
       withCredentials: true,
     })
-      .then(function (response) {
+      .then((response) => {
         return response.data;
       })
-      .catch(function (error) {
+      .catch((error) =>{
         console.log(error.response.data);
       });
 
