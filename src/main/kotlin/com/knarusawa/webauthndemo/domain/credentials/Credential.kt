@@ -106,6 +106,14 @@ class Credential private constructor(
     this.counter = counter
   }
 
+  fun getAuthenticator(): AuthenticatorImpl {
+    return AuthenticatorImpl(
+      /* attestedCredentialData = */ attestedCredentialData,
+      /* attestationStatement   = */ attestationStatement,
+      /* counter                = */ counter
+    )
+  }
+
   override fun toString(): String {
     return """Credential(
       credentialId='$credentialId', 

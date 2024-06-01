@@ -6,7 +6,6 @@ import com.knarusawa.webauthndemo.domain.credentials.CredentialRepository
 import com.knarusawa.webauthndemo.domain.user.UserId
 import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
-import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.exception.DataConversionException
 import com.webauthn4j.data.AuthenticationParameters
 import com.webauthn4j.data.AuthenticationRequest
@@ -41,17 +40,13 @@ class FinishWebAuthnAuthenticationService(
     val credential = credentialRepository.findByCredentialId(inputData.credentialId)
       ?: throw IllegalArgumentException("credential is not found")
 
-    val authenticator = AuthenticatorImpl(
-      /* attestedCredentialData = */ credential.attestedCredentialData,
-      /* attestationStatement   = */ credential.attestationStatement,
-      /* counter                = */ credential.counter
-    )
+    val authenticator = credential.getAuthenticator()
 
     val authenticationParameter = AuthenticationParameters(
       serverProperty,
       authenticator,
       listOf(Base64UrlUtil.decode(credential.credentialId)),
-      false
+      true
     )
 
     val authenticationRequest = AuthenticationRequest(
