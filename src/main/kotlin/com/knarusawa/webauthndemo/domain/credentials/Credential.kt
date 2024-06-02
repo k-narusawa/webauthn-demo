@@ -3,6 +3,7 @@ package com.knarusawa.webauthndemo.domain.credentials
 import com.knarusawa.webauthndemo.adapter.gateway.db.record.CredentialsRecord
 import com.knarusawa.webauthndemo.domain.credentials.converter.AttestationStatementConverter
 import com.knarusawa.webauthndemo.domain.credentials.converter.AuthenticatorExtensionsConverter
+import com.knarusawa.webauthndemo.domain.user.UserId
 import com.webauthn4j.WebAuthnManager
 import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.converter.AttestedCredentialDataConverter
@@ -12,6 +13,7 @@ import com.webauthn4j.converter.util.ObjectConverter
 import com.webauthn4j.data.AuthenticationParameters
 import com.webauthn4j.data.AuthenticationRequest
 import com.webauthn4j.data.AuthenticatorTransport
+import com.webauthn4j.data.RegistrationData
 import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData
 import com.webauthn4j.data.attestation.statement.AttestationStatement
 import com.webauthn4j.data.extension.authenticator.AuthenticationExtensionsAuthenticatorOutputs
@@ -51,17 +53,29 @@ class Credential private constructor(
     private val clientOutputsConverter =
       AuthenticationExtensionsClientOutputsConverter(objectConverter)
 
-    fun of(
-      credentialId: ByteArray?,
-      userId: String,
-      authenticator: AuthenticatorImpl,
-    ): Credential {
+    fun of(userId: UserId, registrationData: RegistrationData): Credential {
+      val attestationObject = registrationData.attestationObject
+
+      if (
+        attestationObject == null ||
+        attestationObject.authenticatorData.attestedCredentialData == null
+      ) {
+        throw IllegalStateException("不正なデータ")
+      }
+
+      val authenticator = AuthenticatorImpl(
+        /* attestedCredentialData = */ attestationObject.authenticatorData.attestedCredentialData!!,
+        /* attestationStatement =   */ attestationObject.attestationStatement,
+        /* counter =                */ attestationObject.authenticatorData.signCount,
+      )
+
+      val credentialId = attestationObject.authenticatorData.attestedCredentialData!!.credentialId
       val rawAAGUID = authenticator.attestedCredentialData.aaguid.value.toString()
       val aaguid = AAGUID.fromAAGUID(rawAAGUID)
 
       return Credential(
         credentialId = Base64UrlUtil.encodeToString(credentialId),
-        userId = userId,
+        userId = userId.toString(),
         aaguid = aaguid,
         label = aaguid.labael,
         attestedCredentialData = authenticator.attestedCredentialData,

@@ -4,9 +4,9 @@ import com.knarusawa.webauthndemo.config.WebAuthnConfig
 import com.knarusawa.webauthndemo.domain.challenge.ChallengeDataRepository
 import com.knarusawa.webauthndemo.domain.credentials.Credential
 import com.knarusawa.webauthndemo.domain.credentials.CredentialRepository
+import com.knarusawa.webauthndemo.domain.user.UserId
 import com.knarusawa.webauthndemo.util.logger
 import com.webauthn4j.WebAuthnManager
-import com.webauthn4j.authenticator.AuthenticatorImpl
 import com.webauthn4j.data.PublicKeyCredentialParameters
 import com.webauthn4j.data.PublicKeyCredentialType
 import com.webauthn4j.data.RegistrationParameters
@@ -52,15 +52,7 @@ class FinishWebAuthnRegistrationService(
     val registrationRequest = RegistrationRequest(attestationObject, clientDataJSON)
     val registrationParameters = RegistrationParameters(serverProperty, pubKeys, true)
 
-    val registrationData =
-      webAuthnManager.parse(registrationRequest)
-
-    if (
-      registrationData.attestationObject == null ||
-      registrationData.attestationObject!!.authenticatorData.attestedCredentialData == null
-    ) {
-      throw IllegalStateException("不正なデータ")
-    }
+    val registrationData = webAuthnManager.parse(registrationRequest)
 
     try {
       webAuthnManager.validate(registrationRequest, registrationParameters)
@@ -69,22 +61,9 @@ class FinishWebAuthnRegistrationService(
       throw IllegalStateException("不正なデータ")
     }
 
-    val authenticator = AuthenticatorImpl(
-      /* attestedCredentialData = */
-      registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!,
-      /* attestationStatement =   */
-      registrationData.attestationObject!!.attestationStatement,
-      /* counter =                */
-      registrationData.attestationObject!!.authenticatorData.signCount,
-    )
-
-    val credentialId =
-      registrationData.attestationObject!!.authenticatorData.attestedCredentialData!!.credentialId
-
     val credential = Credential.of(
-      credentialId = credentialId,
-      userId = inputData.userId,
-      authenticator = authenticator,
+      userId = UserId.from(inputData.userId),
+      registrationData = registrationData
     )
 
     log.debug("Credential is created")
